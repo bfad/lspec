@@ -61,12 +61,60 @@ if(not #success) => {
 #test_desc = "A [describe] statement inserts a test group object into [lspec->suite]"
 local(num_before) = lspec->suite->size
 describe("Something") => {}
-if(lspec->suite->size != (#num_before + 1) ||
-   not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)
-) => {
+if(lspec->suite->size != (#num_before + 1)) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
 
+
+
+#test_desc = "A [describe] statement inserts into [lspec->result]"
+// Completely reseting the lspec alias
+var_defined('_lspec') ? $_lspec = void
+describe("Something") => {}
+if(lspec->result != "Something") => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+var_defined('_lspec') ? $_lspec = void
+
+
+
+#test_desc = "The [lspec->clearSuite] clears the suite and the result"
+// Completely reseting the lspec alias
+var_defined('_lspec') ? $_lspec = void
+describe("Something") => {}
+lspec->clearSuite
+if(lspec->suite->size != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->result != '') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+var_defined('_lspec') ? $_lspec = void
+
+
+
+/*#test_desc = "Testing the basic output of a successful test"
+lspec->clearSuite
+lspec->printSuccesses = true
+describe("Something") => {
+    it("does something") => {}
+}
+if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}*/
 //lspec->clearTestSuite

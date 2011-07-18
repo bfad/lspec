@@ -22,7 +22,18 @@ define error_msg_lspecNoSurroundingDescribe  => 'The [it] block is not encompass
 
 
 define lspec_impl => type {
-    data public suite = array
+    data public suite = array,
+         public result = string
+    
+    public clearSuite => {
+        .suite  = array
+        .result = string
+    }
+    
+    public output(tg::lspec_testGroup) => {
+        .result != '' ? .result += '\n'
+        .result += #tg->label
+    }
 }
 
 define lspec => {
@@ -56,7 +67,9 @@ define describe(label) => {
     in_describe = true
     handle => { in_describe = false }
     
-    lspec->suite->insert(lspec_testGroup(#label))
+    local(me) = lspec_testGroup(#label)
+    lspec->suite->insert(#me)
+    lspec->output(#me)
     
     givenBlock()
     blocks->forEach => {#1->invoke}
