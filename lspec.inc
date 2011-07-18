@@ -9,6 +9,14 @@ define try => {
     #e->name != 0 ? fail(#e->name,#e->value)
 }
 
+/*
+* Terminology:
+*   test case  => each [expect] style statement
+*   test       => each [it]  style statement
+*   test group => each [describe] style statement
+*   test suite => Compilation of all the test groups [lspec->suite]
+*/
+
 define error_code_lspecNoSurroundingDescribe => 100
 define error_msg_lspecNoSurroundingDescribe  => 'The [it] block is not encompassed in a [describe] block'
 
@@ -32,7 +40,7 @@ define lspec_testGroup => type {
 
 
 define it(label) => {
-    fail_if(num_describes == 0, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
+    fail_if(not in_describe, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
     blocks->insert(givenBlock)
 }
 
@@ -45,8 +53,8 @@ define blocks => {
 
 
 define describe(label) => {
-    num_describes++
-    handle => { num_describes-- }
+    in_describe = true
+    handle => { in_describe = false }
     
     lspec->suite->insert(lspec_testGroup(#label))
     
@@ -54,79 +62,11 @@ define describe(label) => {
     blocks->forEach => {#1->invoke}
 }
 
-define num_describes => {
-    not var(_describes)? var(_describes) = 0
-    return $_describes
+define in_describe => {
+    not var(_in_describe)? var(_in_describe) = false
+    return $_in_describe
 }
-define num_describes=(rhs::integer) => {
-    not var(_describes)? var(_describes)
-    $_describes = #rhs
+define in_describe=(rhs::boolean) => {
+    not var(_in_describe)? var(_in_describe)
+    $_in_describe = #rhs
 }
-
-/*
-
-
-
-define describes => {
-    not var(_describes)? var(_describes) = array
-    return $_describes
-}
-
-define describe(label) => {
-    
-    stdoutnl(#label)
-    givenBlock()
-    its->forEach => {#1->invoke}
-}
-
-define it(label) => {
-    stdoutnl('\t'+#label)
-    its->insert(givenBlock)
-}
-
-
-
-describe("Foo") => {
-    describe("Bar") => {
-        local(test) = 0
-    }
-    it("does something") => {
-        #test = 1
-    }
-}
-
-stdoutnl('\t\t' + #test)
-stdoutnl('\t\t' + #test)
-
-
-
-describe => {1
-    describe => {A
-        describe => {B
-            
-        }
-    }
-    describe => {C
-        describe => {D
-            
-        }
-        describe => {E
-            
-        }
-    }
-    describe => {F
-        
-    }
-}
-
-1
-array(A,C,F)
-F
-C
-array(A,D,E)
-E
-D
-A
-array(B)
-B
-*/
