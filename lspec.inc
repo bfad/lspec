@@ -22,17 +22,28 @@ define error_msg_lspecNoSurroundingDescribe  => 'The [it] block is not encompass
 
 
 define lspec_impl => type {
-    data public suite = array,
-         public result = string
+    data public suite  = array,
+         public result = string,
+         
+         //Formatting options
+         public printSuccesses = false,
+         public indentor       = "    "
     
     public clearSuite => {
         .suite  = array
         .result = string
     }
     
+    public addTest(test::lspec_test) => {
+        .suite->last->tests->insert(#test)
+    }
+    
     public output(tg::lspec_testGroup) => {
         .result != '' ? .result += '\n'
         .result += #tg->label
+    }
+    public output(test::lspec_test) => {
+        .result += '\n' + .indentor + #test->label
     }
 }
 
@@ -42,25 +53,29 @@ define lspec => {
 }
 
 define lspec_testGroup => type {
-    data public label::string
+    data public label::string,
+         public tests = array
     
     public onCreate(label) => {
         .label = #label->asString
     }
 }
 
+define lspec_test => type {
+    data public label::string,
+         public block::capture
+    
+    public onCreate(label, gb::capture) => {
+        .label = #label->asString
+        .block = #gb
+    }
+}
+
 
 define it(label) => {
     fail_if(not in_describe, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
-    blocks->insert(givenBlock)
+    lspec->addTest(lspec_test(#label, givenBlock))
 }
-
-define blocks => {
-    not var(_blocks)? var(_blocks) = array
-    return $_blocks
-}
-
-
 
 
 define describe(label) => {
@@ -72,7 +87,10 @@ define describe(label) => {
     lspec->output(#me)
     
     givenBlock()
-    blocks->forEach => {#1->invoke}
+    #me->tests->forEach => {
+        lspec->output(#1)
+        #1->block->invoke
+    }
 }
 
 define in_describe => {
