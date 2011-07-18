@@ -55,3 +55,18 @@ if(not #success) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "A [describe] statement inserts a test group object into [lspec->suite]"
+local(num_before) = lspec->suite->size
+describe("Something") => {}
+if(lspec->suite->size != (#num_before + 1) ||
+   not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)
+) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+//lspec->clearTestSuite

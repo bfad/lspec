@@ -13,6 +13,23 @@ define error_code_lspecNoSurroundingDescribe => 100
 define error_msg_lspecNoSurroundingDescribe  => 'The [it] block is not encompassed in a [describe] block'
 
 
+define lspec_impl => type {
+    data public suite = array
+}
+
+define lspec => {
+    not var(_lspec)? var(_lspec) = lspec_impl
+    return $_lspec
+}
+
+define lspec_testGroup => type {
+    data public label::string
+    
+    public onCreate(label) => {
+        .label = #label->asString
+    }
+}
+
 
 define it(label) => {
     fail_if(num_describes == 0, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
@@ -30,6 +47,9 @@ define blocks => {
 define describe(label) => {
     num_describes++
     handle => { num_describes-- }
+    
+    lspec->suite->insert(lspec_testGroup(#label))
+    
     givenBlock()
     blocks->forEach => {#1->invoke}
 }
