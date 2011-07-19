@@ -25,6 +25,9 @@ define lspec_impl => type {
     data public suite  = array,
          public result = string,
          
+         // Flow status
+         public inDescribe = false,
+         
          // Stats
          public numTests     = 0,
          public numTestCases = 0,
@@ -93,14 +96,14 @@ define lspec_test => type {
 
 
 define it(label) => {
-    fail_if(not in_describe, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
+    fail_if(not lspec->inDescribe, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
     lspec->addTest(lspec_test(#label, givenBlock))
 }
 
 
 define describe(label) => {
-    in_describe = true
-    handle => { in_describe = false }
+    lspec->inDescribe = true
+    handle => { lspec->inDescribe = false }
     
     local(me) = lspec_testGroup(#label)
     lspec->suite->insert(#me)
@@ -120,15 +123,6 @@ define describe(label) => {
         lspec->numTestCases == #cur_cases?
             lspec->numPending++
     }
-}
-
-define in_describe => {
-    not var(_in_describe)? var(_in_describe) = false
-    return $_in_describe
-}
-define in_describe=(rhs::boolean) => {
-    not var(_in_describe)? var(_in_describe)
-    $_in_describe = #rhs
 }
 
 
