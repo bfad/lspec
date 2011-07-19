@@ -8,8 +8,8 @@ local(test_desc) = "It should throw an error if an [it] method isn't inside a [d
 
 try => {
     local(success) = false
-    handle(error_code == error_code_lspecNoSurroundingDescribe &&
-           error_msg  == error_msg_lspecNoSurroundingDescribe) => 
+    handle(error_code == error_code_lspecNotInTestGroup &&
+           error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
@@ -130,6 +130,41 @@ if(lspec->numTests != 1) => {
     abort
 }
 if(lspec->numPending != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "It should throw an error if an [expect] method isn't inside an [it] method"
+lspec->clearSuite
+try => {
+    local(success) = false
+    handle(error_code == error_code_lspecNotInTest &&
+           error_msg  == error_msg_lspecNotInTest) => 
+    {
+        failure_clear
+        error_reset
+        #success = true
+    }
+    
+    expect(true)
+    if(not #success) => {
+        stdoutnl('Test Failed\n' + #test_desc)
+        stdoutnl(currentCapture->callStack->split('\n')->first)
+        abort
+    }
+}
+
+#success = false
+describe("Something") => {
+    it("does something") => {
+        expect(true)
+        #success = true
+    }
+}
+if(not #success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

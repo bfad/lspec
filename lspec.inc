@@ -17,8 +17,11 @@ define try => {
 *   test suite => Compilation of all the test groups [lspec->suite]
 */
 
-define error_code_lspecNoSurroundingDescribe => 100
-define error_msg_lspecNoSurroundingDescribe  => 'The [it] block is not encompassed in a [describe] block'
+define error_code_lspecNotInTestGroup => 100
+define error_msg_lspecNotInTestGroup  => 'The test block is not encompassed in a test group block'
+
+define error_code_lspecNotInTest => 101
+define error_msg_lspecNotInTest  => "The test case is not encompassed in a test block"
 
 
 define lspec_impl => type {
@@ -26,7 +29,8 @@ define lspec_impl => type {
          public result = string,
          
          // Flow status
-         public inDescribe = false,
+         public inTestGroup = false,
+         public inTest      = false,
          
          // Stats
          public numTests     = 0,
@@ -95,15 +99,9 @@ define lspec_test => type {
 }
 
 
-define it(label) => {
-    fail_if(not lspec->inDescribe, error_code_lspecNoSurroundingDescribe, error_msg_lspecNoSurroundingDescribe)
-    lspec->addTest(lspec_test(#label, givenBlock))
-}
-
-
 define describe(label) => {
-    lspec->inDescribe = true
-    handle => { lspec->inDescribe = false }
+    lspec->inTestGroup = true
+    handle => { lspec->inTestGroup = false }
     
     local(me) = lspec_testGroup(#label)
     lspec->suite->insert(#me)
@@ -116,6 +114,8 @@ define describe(label) => {
         lspec->numTests++
         lspec->output(#1)
         
+        lspec->inTest = true
+        handle => { lspec->inTest = false }
         #1->block->invoke
         
         lspec->numFailures == #cur_failures? 
@@ -126,7 +126,14 @@ define describe(label) => {
 }
 
 
+define it(label) => {
+    fail_if(not lspec->inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
+    lspec->addTest(lspec_test(#label, givenBlock))
+}
+
+
 define expect(test_case::boolean) => {
+    fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
     lspec->numTestCases++
     not #test_case? lspec->numFailures++
 }
