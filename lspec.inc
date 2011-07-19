@@ -30,6 +30,7 @@ define lspec_impl => type {
          public numTestCases = 0,
          public numSuccesses = 0,
          public numFailures  = 0,
+         public numPending   = 0,
          
          //Formatting options
          public printSuccesses = false,
@@ -97,6 +98,7 @@ define describe(label) => {
     givenBlock()
     #me->tests->forEach => {
         local(cur_failures) = lspec->numFailures
+        local(cur_cases)    = lspec->numTestCases
         lspec->numTests++
         lspec->output(#1)
         
@@ -104,6 +106,8 @@ define describe(label) => {
         
         lspec->numFailures == #cur_failures? 
             lspec->numSuccesses++
+        lspec->numTestCases == #cur_cases?
+            lspec->numPending++
     }
 }
 
