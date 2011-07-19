@@ -87,9 +87,11 @@ var_defined('_lspec') ? $_lspec = void
 
 
 
-#test_desc = "The [lspec->clearSuite] clears the suite and the result"
+#test_desc = "The [lspec->clearSuite] clears the suite and the result but leaves formatting"
 // Completely reseting the lspec alias
 var_defined('_lspec') ? $_lspec = void
+lspec->printSuccesses = true
+lspec->indentor       = ' '
 describe("Something") => {}
 lspec->clearSuite
 if(lspec->suite->size != 0) => {
@@ -98,6 +100,11 @@ if(lspec->suite->size != 0) => {
     abort
 }
 if(lspec->result != '') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->printSuccesses != true || lspec->indentor != ' ') => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

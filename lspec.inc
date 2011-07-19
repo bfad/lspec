@@ -33,14 +33,18 @@ define lspec_impl => type {
          public numPending   = 0,
          
          //Formatting options
-         public printSuccesses = false,
-         public indentor       = "    "
+         private formatting = map(
+                    'printSuccesses' = false,
+                    'indentor'       = "    ",
+         )
     
     public clearSuite => {
-        //self = lspec_impl
+        local(formatting) = .formatting
+        // Could probably work around by throwing all the defaults into
+        // an onCreate method and then calling that, but would prefer not to
         var(_lspec) = lspec_impl
         
-        //TODO: RESTORE THE CURRENT FORMAT OPTIONS
+        $_lspec->formatting = #formatting
     }
     
     public addTest(test::lspec_test) => {
@@ -54,6 +58,13 @@ define lspec_impl => type {
     public output(test::lspec_test) => {
         .result += '\n' + .indentor + #test->label
     }
+    
+    // Formatting Setters & Getters
+    public printSuccesses => .formatting->find('printSuccesses')
+    public printSuccesses=(rhs::boolean) => { .formatting->find('printSuccesses') = #rhs }
+    
+    public indentor => .formatting->find('indentor')
+    public indentor=(rhs::string) => { .formatting->find('indentor') = #rhs }
 }
 
 define lspec => {
