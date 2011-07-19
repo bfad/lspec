@@ -106,7 +106,7 @@ var_defined('_lspec') ? $_lspec = void
 
 
 
-#test_desc = "Testing the basic output of a successful test"
+#test_desc = "Testing the basic output of a successful test & [lspec->numTests] increments"
 lspec->clearSuite
 lspec->printSuccesses = true
 describe("Something") => {
@@ -117,4 +117,34 @@ if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-//lspec->clearTestSuite
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "Increments [lspec->numSuccesses] & [lspec->numTestCases] and has the proper success output"
+lspec->clearSuite
+lspec->printSuccesses = true
+describe("Something") => {
+    it("does something") => {
+        expect(true)
+    }
+}
+if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numTestCases != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

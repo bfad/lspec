@@ -25,13 +25,21 @@ define lspec_impl => type {
     data public suite  = array,
          public result = string,
          
+         // Stats
+         public numTests     = 0,
+         public numTestCases = 0,
+         public numSuccesses = 0,
+         public numFailures  = 0,
+         
          //Formatting options
          public printSuccesses = false,
          public indentor       = "    "
     
     public clearSuite => {
-        .suite  = array
-        .result = string
+        //self = lspec_impl
+        var(_lspec) = lspec_impl
+        
+        //TODO: RESTORE THE CURRENT FORMAT OPTIONS
     }
     
     public addTest(test::lspec_test) => {
@@ -88,8 +96,14 @@ define describe(label) => {
     
     givenBlock()
     #me->tests->forEach => {
+        local(cur_failures) = lspec->numFailures
+        lspec->numTests++
         lspec->output(#1)
+        
         #1->block->invoke
+        
+        lspec->numFailures == #cur_failures? 
+            lspec->numSuccesses++
     }
 }
 
@@ -100,4 +114,10 @@ define in_describe => {
 define in_describe=(rhs::boolean) => {
     not var(_in_describe)? var(_in_describe)
     $_in_describe = #rhs
+}
+
+
+define expect(test_case::boolean) => {
+    lspec->numTestCases++
+    not #test_case? lspec->numFailures++
 }
