@@ -1,14 +1,3 @@
-// [try] method developed by Bil Corey
-define try => {
-    local(e) = pair(0='No error')
-    local(gb) = givenBlock
-    protect => {
-        handle_error => { #e = pair(error_code = error_msg) }
-        #gB()
-    }
-    #e->name != 0 ? fail(#e->name,#e->value)
-}
-
 /*
 * Terminology:
 *   test case  => each [expect] style statement
@@ -74,10 +63,7 @@ define lspec_impl => type {
     public indentor=(rhs::string) => { .formatting->find('indentor') = #rhs }
 }
 
-define lspec => {
-    not var(_lspec)? var(_lspec) = lspec_impl
-    return $_lspec
-}
+define lspec => var(_lspec) || var(_lspec) := lspec_impl
 
 define lspec_testGroup => type {
     data public label::string,

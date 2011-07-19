@@ -4,8 +4,20 @@ not #path_here->endsWith('/') ? #path_here += '/'
 local(f) = file(#path_here + '../lspec.inc')
 sourcefile(#f->readString, #f->path, false, false)->invoke
 
-local(test_desc) = "It should throw an error if an [it] method isn't inside a [describe] method"
+// [try] method developed by Bil Corey
+define try => {
+    local(e) = pair(0='No error')
+    local(gb) = givenBlock
+    protect => {
+        handle_error => { #e = pair(error_code = error_msg) }
+        #gB()
+    }
+    #e->name != 0 ? fail(#e->name,#e->value)
+}
 
+
+
+local(test_desc) = "It should throw an error if an [it] method isn't inside a [describe] method"
 try => {
     local(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
