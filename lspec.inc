@@ -29,19 +29,10 @@ define lspec_impl => type {
          public numPending   = 0,
          
          //Formatting options
-         private formatting = map(
+         public formatting = map(
                     'printSuccesses' = false,
                     'indentor'       = "    ",
          )
-    
-    public clearSuite => {
-        local(formatting) = .formatting
-        // Could probably work around by throwing all the defaults into
-        // an onCreate method and then calling that, but would prefer not to
-        var(_lspec) = lspec_impl
-        
-        $_lspec->formatting = #formatting
-    }
     
     public addTest(test::lspec_test) => {
         .suite->last->tests->insert(#test)
@@ -64,6 +55,15 @@ define lspec_impl => type {
 }
 
 define lspec => var(_lspec) || var(_lspec) := lspec_impl
+// Could probably work around by throwing all the defaults into
+// an onCreate method and then calling that, but would prefer not to
+// as I'd have to remember to add every new data member to the oncreate
+// even if it would be to just set it up with void
+define lspec_clearSuite => {
+    local(formatting) = lspec->formatting
+    var(_lspec) = lspec_impl
+    $_lspec->formatting = #formatting
+}
 
 define lspec_testGroup => type {
     data public label::string,

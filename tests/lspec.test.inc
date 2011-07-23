@@ -99,13 +99,13 @@ var_defined('_lspec') ? $_lspec = void
 
 
 
-#test_desc = "The [lspec->clearSuite] clears the suite and the result but leaves formatting"
+#test_desc = "The [lspec_clearSuite] clears the suite and the result but leaves formatting"
 // Completely reseting the lspec alias
 var_defined('_lspec') ? $_lspec = void
 lspec->printSuccesses = true
 lspec->indentor       = ' '
 describe("Something") => {}
-lspec->clearSuite
+lspec_clearSuite
 if(lspec->suite->size != 0) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -126,7 +126,7 @@ var_defined('_lspec') ? $_lspec = void
 
 
 #test_desc = "Testing the basic output of a successful test & [lspec->numTests] & [lspec->numPending] increments"
-lspec->clearSuite
+lspec_clearSuite
 lspec->printSuccesses = true
 describe("Something") => {
     it("does something") => {}
@@ -150,7 +150,7 @@ if(lspec->numPending != 1) => {
 
 
 #test_desc = "It should throw an error if an [expect] method isn't inside an [it] method"
-lspec->clearSuite
+lspec_clearSuite
 try => {
     local(success) = false
     handle(error_code == error_code_lspecNotInTest &&
@@ -185,7 +185,7 @@ if(not #success) => {
 
 
 #test_desc = "Increments [lspec->numSuccesses] & [lspec->numTestCases] and has the proper success output"
-lspec->clearSuite
+lspec_clearSuite
 lspec->printSuccesses = true
 describe("Something") => {
     it("does something") => {
