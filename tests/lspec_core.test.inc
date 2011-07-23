@@ -197,6 +197,30 @@ if(lspec->numPending != 0) => {
 
 
 
+#test_desc = "Tests for valid resultsFormat options"
+lspec_setupForTesting
+try => {
+    local(success) = false
+    handle(error_code == error_code_lspecInvalidResultFormat &&
+           error_msg  == error_msg_lspecInvalidResultFormat) => 
+    {
+        failure_clear
+        error_reset
+        #success = true
+    }
+    
+    lspec->resultsFormat = '#'
+    if(not #success) => {
+        stdoutnl('Test Failed\n' + #test_desc)
+        stdoutnl(currentCapture->callStack->split('\n')->first)
+        abort
+    }
+}
+lspec->resultsFormat = 'p'
+lspec->resultsFormat = 'd'
+
+
+
 #test_desc = "Output is properly suppressed"
 stdoutnl('Pending\n    ' + #test_desc + '\n')
 

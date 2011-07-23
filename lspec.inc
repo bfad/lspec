@@ -11,6 +11,9 @@ define error_msg_lspecNotInTestGroup  => 'The test block is not encompassed in a
 
 define error_code_lspecNotInTest => 101
 define error_msg_lspecNotInTest  => "The test case is not encompassed in a test block"
+    
+define error_code_lspecInvalidResultFormat => 102
+define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
 
 
 define lspec_impl => type {
@@ -29,7 +32,8 @@ define lspec_impl => type {
          public numPending   = 0,
          
          // Configuration Options
-         public options = map(
+         private validFormats = (:'p', 'd'),
+         public  options      = map(
                     'resultsFormat'  = "p",
                     'indentor'       = "    ",
                     'suppressOutput' = false,
@@ -51,7 +55,9 @@ define lspec_impl => type {
     // Options Setters & Getters
     public resultsFormat => .options->find('resultsFormat')
     public resultsFormat=(rhs::string) => {
-        //if((:'p', 'd')->contains(#rhs))
+        fail_if(not .validFormats->contains(#rhs), 
+            error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
+        
         .options->find('resultsFormat') = #rhs
     }
     
