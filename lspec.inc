@@ -37,6 +37,7 @@ define lspec_impl => type {
     
     public addTest(test::lspec_test) => {
         .suite->last->tests->insert(#test)
+        .numTests++
     }
     
     public output(tg::lspec_testGroup) => {
@@ -101,7 +102,7 @@ define describe(label) => {
     #me->tests->forEach => {
         local(cur_failures) = lspec->numFailures
         local(cur_cases)    = lspec->numTestCases
-        lspec->numTests++
+        
         lspec->output(#1)
         
         lspec->inTest = true
