@@ -77,6 +77,8 @@ define lspec_testGroup => type {
     public onCreate(label) => {
         .label = #label->asString
     }
+    
+    public numTests => .tests->size
 }
 
 define lspec_test => type {
