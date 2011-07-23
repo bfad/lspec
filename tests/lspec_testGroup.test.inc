@@ -4,8 +4,15 @@ not #path_here->endsWith('/') ? #path_here += '/'
 local(f) = file(#path_here + '../lspec.inc')
 sourcefile(#f->readString, #f->path, false, false)->invoke
 
+// Resets lspec for testing
+define lspec_setupForTesting => {
+    var(_lspec) = void
+    lspec->resultsFormat = 'd'
+}
+
+
 local(test_desc) = "Given a describe with 2 it blocks, it should return 2 as the number of tests"
-lspec_clearSuite
+lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {}
     it("Does something else") => {}

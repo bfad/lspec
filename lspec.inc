@@ -28,9 +28,9 @@ define lspec_impl => type {
          public numFailures  = 0,
          public numPending   = 0,
          
-         //Formatting options
-         public formatting = map(
-                    'printSuccesses' = false,
+         // Configuration Options
+         public options = map(
+                    'resultsFormat'  = "p",
                     'indentor'       = "    ",
                     'suppressOutput' = false,
          )
@@ -48,12 +48,15 @@ define lspec_impl => type {
         .result += '\n' + .indentor + #test->label
     }
     
-    // Formatting Setters & Getters
-    public printSuccesses => .formatting->find('printSuccesses')
-    public printSuccesses=(rhs::boolean) => { .formatting->find('printSuccesses') = #rhs }
+    // Options Setters & Getters
+    public resultsFormat => .options->find('resultsFormat')
+    public resultsFormat=(rhs::string) => {
+        //if((:'p', 'd')->contains(#rhs))
+        .options->find('resultsFormat') = #rhs
+    }
     
-    public indentor => .formatting->find('indentor')
-    public indentor=(rhs::string) => { .formatting->find('indentor') = #rhs }
+    public indentor => .options->find('indentor')
+    public indentor=(rhs::string) => { .options->find('indentor') = #rhs }
     
     public suppressOutput => .fromatting->find('suppressOutput')
     public suppressOutput=(rhs::boolean) => { .fromatting->find('suppressOutput') = #rhs }
@@ -65,9 +68,9 @@ define lspec => var(_lspec) || var(_lspec) := lspec_impl
 // as I'd have to remember to add every new data member to the oncreate
 // even if it would be to just set it up with void
 define lspec_clearSuite => {
-    local(formatting) = lspec->formatting
+    local(options) = lspec->options
     var(_lspec) = lspec_impl
-    $_lspec->formatting = #formatting
+    $_lspec->options = #options
 }
 
 define lspec_testGroup => type {

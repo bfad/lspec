@@ -15,6 +15,11 @@ define try => {
     #e->name != 0 ? fail(#e->name,#e->value)
 }
 
+// Resets lspec for testing
+define lspec_setupForTesting => {
+    var(_lspec) = void
+    lspec->resultsFormat = 'd'
+}
 
 
 local(test_desc) = "It should throw an error if an [it] method isn't inside a [describe] method"
@@ -87,22 +92,20 @@ if(not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)) => {
 
 
 #test_desc = "A [describe] statement inserts into [lspec->result]"
-// Completely reseting the lspec alias
-var_defined('_lspec') ? $_lspec = void
+lspec_setupForTesting
 describe("Something") => {}
 if(lspec->result != "Something") => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-var_defined('_lspec') ? $_lspec = void
 
 
 
-#test_desc = "The [lspec_clearSuite] clears the suite and the result but leaves formatting"
+#test_desc = "The [lspec_clearSuite] clears the suite and the result but leaves options"
 // Completely reseting the lspec alias
 var_defined('_lspec') ? $_lspec = void
-lspec->printSuccesses = true
+lspec->resultsFormat = 'd'
 lspec->indentor       = ' '
 describe("Something") => {}
 lspec_clearSuite
@@ -116,18 +119,17 @@ if(lspec->result != '') => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(lspec->printSuccesses != true || lspec->indentor != ' ') => {
+if(lspec->resultsFormat != 'd' || lspec->indentor != ' ') => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-var_defined('_lspec') ? $_lspec = void
+lspec_setupForTesting
 
 
 
-#test_desc = "Testing basic output of a pending test & [lspec->numTests] & [lspec->numPending] increments while [lspec->numSuccesses] does not"
-lspec_clearSuite
-lspec->printSuccesses = true
+#test_desc = "Testing documentation output of a pending test & [lspec->numTests] & [lspec->numPending] increments while [lspec->numSuccesses] does not"
+lspec_setupForTesting
 describe("Something") => {
     it("does something") => {}
 }
@@ -155,7 +157,7 @@ if(lspec->numPending != 1) => {
 
 
 #test_desc = "It should throw an error if an [expect] method isn't inside an [it] method"
-lspec_clearSuite
+lspec_setupForTesting
 try => {
     local(success) = false
     handle(error_code == error_code_lspecNotInTest &&
@@ -189,9 +191,8 @@ if(not #success) => {
 
 
 
-#test_desc = "Increments [lspec->numSuccesses] & [lspec->numTestCases] and has the proper success output"
-lspec_clearSuite
-lspec->printSuccesses = true
+#test_desc = "Increments [lspec->numSuccesses] & [lspec->numTestCases] and has the proper documentation output"
+lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         expect(true)
