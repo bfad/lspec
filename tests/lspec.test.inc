@@ -217,3 +217,13 @@ if(lspec->numPending != 0) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "Output is properly suppressed"
+stdoutnl('Pending\n    ' + #test_desc + '\n')
+
+
+
+#test_desc = "Output is properly not suppressed"
+stdoutnl('Pending\n    ' + #test_desc + '\n')

@@ -32,6 +32,7 @@ define lspec_impl => type {
          public formatting = map(
                     'printSuccesses' = false,
                     'indentor'       = "    ",
+                    'suppressOutput' = false,
          )
     
     public addTest(test::lspec_test) => {
@@ -52,6 +53,9 @@ define lspec_impl => type {
     
     public indentor => .formatting->find('indentor')
     public indentor=(rhs::string) => { .formatting->find('indentor') = #rhs }
+    
+    public suppressOutput => .fromatting->find('suppressOutput')
+    public suppressOutput=(rhs::boolean) => { .fromatting->find('suppressOutput') = #rhs }
 }
 
 define lspec => var(_lspec) || var(_lspec) := lspec_impl
