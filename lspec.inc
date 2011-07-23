@@ -104,10 +104,10 @@ define describe(label) => {
         handle => { lspec->inTest = false }
         #1->block->invoke
         
-        lspec->numFailures == #cur_failures? 
-            lspec->numSuccesses++
         lspec->numTestCases == #cur_cases?
             lspec->numPending++
+        | lspec->numFailures == #cur_failures? 
+            lspec->numSuccesses++
     }
 }
 

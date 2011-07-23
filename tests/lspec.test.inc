@@ -125,7 +125,7 @@ var_defined('_lspec') ? $_lspec = void
 
 
 
-#test_desc = "Testing the basic output of a successful test & [lspec->numTests] & [lspec->numPending] increments"
+#test_desc = "Testing basic output of a pending test & [lspec->numTests] & [lspec->numPending] increments while [lspec->numSuccesses] does not"
 lspec_clearSuite
 lspec->printSuccesses = true
 describe("Something") => {
@@ -137,6 +137,11 @@ if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
     abort
 }
 if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -203,6 +208,11 @@ if(lspec->numSuccesses != 1) => {
     abort
 }
 if(lspec->numTestCases != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
