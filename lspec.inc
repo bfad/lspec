@@ -81,13 +81,26 @@ define lspec_clearSuite => {
 
 define lspec_testGroup => type {
     data public label::string,
+         public block::capture,
          public tests = array
     
-    public onCreate(label) => {
+    public onCreate(label, gb::capture) => {
         .label = #label->asString
+        .block = #gb
     }
     
     public numTests => .tests->size
+    
+    public run => {
+        lspec->inTestGroup = true
+        handle => { lspec->inTestGroup = false }
+        
+        lspec->output(self)
+        .block->invoke
+        .tests->forEach => {
+            #1->run
+        }
+    }
 }
 
 define lspec_test => type {
@@ -98,33 +111,29 @@ define lspec_test => type {
         .label = #label->asString
         .block = #gb
     }
-}
-
-
-define describe(label) => {
-    lspec->inTestGroup = true
-    handle => { lspec->inTestGroup = false }
     
-    local(me) = lspec_testGroup(#label)
-    lspec->suite->insert(#me)
-    lspec->output(#me)
-    
-    givenBlock()
-    #me->tests->forEach => {
+    public run => {
         local(cur_failures) = lspec->numFailures
         local(cur_cases)    = lspec->numTestCases
-        
-        lspec->output(#1)
-        
+
+        lspec->output(self)
+
         lspec->inTest = true
         handle => { lspec->inTest = false }
-        #1->block->invoke
-        
+        .block->invoke
+
         lspec->numTestCases == #cur_cases?
             lspec->numPending++
         | lspec->numFailures == #cur_failures? 
             lspec->numSuccesses++
     }
+}
+
+
+define describe(label) => {
+    local(me) = lspec_testGroup(#label, givenBlock)
+    lspec->suite->insert(#me)
+    #me->run
 }
 
 

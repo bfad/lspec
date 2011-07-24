@@ -9,3 +9,25 @@ if(lspec->suite->first->numTests != 2) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "Sub-test groups properly handled at the end of tests & outputed correctly"
+lspec_setupForTesting
+describe("Something") => {
+    it("Does something") => {}
+    describe("As an aspect") => {
+        it("Does something cool") => {}
+    }
+    it("Does something else") => {}
+}
+local(my_result) = 'Something
+' + lspec->indentor + 'Does something
+' + lspec->indentor + 'Does something else
+' + lspec->indentor + 'As an aspect
+' + lspec->indentor + lspec->indentor + 'Does something cool';
+if(lspec->result != #my_result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
