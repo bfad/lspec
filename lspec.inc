@@ -21,8 +21,9 @@ define lspec_impl => type {
          public result = string,
          
          // Flow status
-         public inTestGroup = false,
-         public inTest      = false,
+         public inTestGroup  = false,
+         public inTest       = false,
+         public currentDepth = 0,
          
          // Stats
          public numTests     = 0,
@@ -39,17 +40,33 @@ define lspec_impl => type {
                     'suppressOutput' = false,
          )
     
+    public addTestGroup(tg::lspec_testGroup) => {
+        if(.inTestGroup) => {
+            .getCurrentTestGroup->groups->insert(#tg)
+        else
+            lspec->suite->insert(#tg)
+            #tg->run
+        }
+    }
     public addTest(test::lspec_test) => {
-        .suite->last->tests->insert(#test)
+        .getCurrentTestGroup->tests->insert(#test)
         .numTests++
+    }
+    
+    private getCurrentTestGroup => {
+        local(ret_val) = lspec->suite->last
+        loop(.currentDepth) => {
+            #ret_val = #ret_val->groups->last
+        }
+        return #ret_val
     }
     
     public output(tg::lspec_testGroup) => {
         .result != '' ? .result += '\n'
-        .result += #tg->label
+        .result += (.indentor * .currentDepth) + #tg->label
     }
     public output(test::lspec_test) => {
-        .result += '\n' + .indentor + #test->label
+        .result += '\n' + (.indentor * .currentDepth) + .indentor + #test->label
     }
     
     // Options Setters & Getters
@@ -82,7 +99,8 @@ define lspec_clearSuite => {
 define lspec_testGroup => type {
     data public label::string,
          public block::capture,
-         public tests = array
+         public tests  = array,
+         public groups = array
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -99,6 +117,11 @@ define lspec_testGroup => type {
         .block->invoke
         .tests->forEach => {
             #1->run
+        }
+        .groups->forEach => {
+            lspec->currentDepth++
+            #1->run 
+            lspec->currentDepth--
         }
     }
 }
@@ -132,8 +155,7 @@ define lspec_test => type {
 
 define describe(label) => {
     local(me) = lspec_testGroup(#label, givenBlock)
-    lspec->suite->insert(#me)
-    #me->run
+    lspec->addTestGroup(#me)
 }
 
 
