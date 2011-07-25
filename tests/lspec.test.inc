@@ -19,6 +19,7 @@ define try => {
 define lspec_setupForTesting => {
     var(_lspec) = void
     lspec->resultsFormat = 'd'
+    lspec->suppressOutput = true
 }
 
 

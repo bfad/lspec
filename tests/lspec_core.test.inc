@@ -1,4 +1,5 @@
 local(test_desc) = "It should throw an error if an [it] method isn't inside a [describe] method"
+lspec_setupForTesting
 try => {
     local(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
@@ -31,6 +32,7 @@ try => {
 
 
 #test_desc = "An [it] method should only have it's givenBlock called by a [describe] method"
+lspec_setupForTesting
 #success = false
 local(gets_to_it) = false
 describe("Something") => {
@@ -52,6 +54,7 @@ if(not #success) => {
 
 
 #test_desc = "A [describe] statement inserts a test group object into [lspec->suite]"
+lspec_setupForTesting
 local(num_before) = lspec->suite->size
 describe("Something") => {}
 if(lspec->suite->size != (#num_before + 1)) => {
@@ -83,6 +86,7 @@ if(lspec->result != "Something") => {
 var_defined('_lspec') ? $_lspec = void
 lspec->resultsFormat = 'd'
 lspec->indentor       = ' '
+lspec->suppressOutput = true
 describe("Something") => {}
 lspec_clearSuite
 if(lspec->suite->size != 0) => {
@@ -222,9 +226,56 @@ lspec->resultsFormat = 'd'
 
 
 #test_desc = "Output is properly suppressed"
-stdoutnl('Pending\n    ' + #test_desc + '\n')
+lspec_setupForTesting
+// save stdout using ->dup
+local(saveStdout = file_stdout->fd->dup)
+// create a local conduit
+local(readFd, writeFd) = io_file_pipe
+// close real stout, reopen it on our write pipe using dup2 system call
+#writeFd->dup2(file_stdout->fd)
+// make a file object here which we read stout from
+local(readTest = file(#readFd))
+
+describe("Something") => {
+    it("does something") => {}
+}
+
+// read test data
+local(didRead = #readTest->readString)
+// set stout back using our save
+#saveStdout->dup2(file_stdout->fd)
+
+if(#didRead != '') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
 
 
 
 #test_desc = "Output is properly not suppressed"
-stdoutnl('Pending\n    ' + #test_desc + '\n')
+lspec_setupForTesting
+lspec->suppressOutput = false
+// save stdout using ->dup
+local(saveStdout = file_stdout->fd->dup)
+// create a local conduit
+local(readFd, writeFd) = io_file_pipe
+// close real stout, reopen it on our write pipe using dup2 system call
+#writeFd->dup2(file_stdout->fd)
+// make a file object here which we read stout from
+local(readTest = file(#readFd))
+
+describe("Something") => {
+    it("does something") => {}
+}
+
+// read test data
+local(didRead = #readTest->readString)
+// set stout back using our save
+#saveStdout->dup2(file_stdout->fd)
+
+if(#didRead != lspec->result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

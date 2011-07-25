@@ -62,11 +62,15 @@ define lspec_impl => type {
     }
     
     public output(tg::lspec_testGroup) => {
+        local(out) = (.indentor * .currentDepth) + #tg->label
         .result != '' ? .result += '\n'
-        .result += (.indentor * .currentDepth) + #tg->label
+        .result += #out
+        not .suppressOutput? stdout(#out)
     }
     public output(test::lspec_test) => {
-        .result += '\n' + (.indentor * .currentDepth) + .indentor + #test->label
+        local(out) = '\n' + (.indentor * .currentDepth) + .indentor + #test->label
+        .result += #out
+        not .suppressOutput? stdout(#out)
     }
     
     // Options Setters & Getters
@@ -81,8 +85,8 @@ define lspec_impl => type {
     public indentor => .options->find('indentor')
     public indentor=(rhs::string) => { .options->find('indentor') = #rhs }
     
-    public suppressOutput => .fromatting->find('suppressOutput')
-    public suppressOutput=(rhs::boolean) => { .fromatting->find('suppressOutput') = #rhs }
+    public suppressOutput => .options->find('suppressOutput')
+    public suppressOutput=(rhs::boolean) => { .options->find('suppressOutput') = #rhs }
 }
 
 define lspec => var(_lspec) || var(_lspec) := lspec_impl
