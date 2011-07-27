@@ -12,7 +12,10 @@ define error_msg_lspecNotInTestGroup  => 'The test block is not encompassed in a
 define error_code_lspecNotInTest => 101
 define error_msg_lspecNotInTest  => "The test case is not encompassed in a test block"
     
-define error_code_lspecInvalidResultFormat => 102
+define error_code_lspecTestGroupInTest => 102
+define error_msg_lspecTestGroupInTest  => "The test group is in a test block"
+    
+define error_code_lspecInvalidResultFormat => 103
 define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
 
 
@@ -158,6 +161,8 @@ define lspec_test => type {
 
 
 define describe(label) => {
+    fail_if(lspec->inTest, 
+        error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
     local(me) = lspec_testGroup(#label, givenBlock)
     lspec->addTestGroup(#me)
 }
