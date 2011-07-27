@@ -64,6 +64,10 @@ define lspec_impl => type {
         return #ret_val
     }
     
+    public getCurrentTest => {
+        return .getCurrentTestGroup->tests->get(.getCurrentTestGroup->currentTest)
+    }
+    
     public output(tg::lspec_testGroup) => {
         local(out) = (.indentor * .currentDepth) + #tg->label
         .result != '' ? .result += '\n'
@@ -107,7 +111,9 @@ define lspec_testGroup => type {
     data public label::string,
          public block::capture,
          public tests  = array,
-         public groups = array
+         public groups = array,
+         // Status
+         public currentTest = 0
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -122,7 +128,9 @@ define lspec_testGroup => type {
         
         lspec->output(self)
         .block->invoke
+        .currentTest = 0
         .tests->forEach => {
+            .currentTest++
             #1->run
         }
         .groups->forEach => {
@@ -135,7 +143,8 @@ define lspec_testGroup => type {
 
 define lspec_test => type {
     data public label::string,
-         public block::capture
+         public block::capture,
+         public status::string
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -152,10 +161,13 @@ define lspec_test => type {
         handle => { lspec->inTest = false }
         .block->invoke
 
-        lspec->numTestCases == #cur_cases?
+        if(lspec->numTestCases == #cur_cases) => {
             lspec->numPending++
-        | lspec->numFailures == #cur_failures? 
+            .status = 'pending'
+        else(lspec->numFailures == #cur_failures)
             lspec->numSuccesses++
+            .status = 'success'
+        }
     }
 }
 
@@ -177,5 +189,9 @@ define it(label) => {
 define expect(test_case::boolean) => {
     fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
     lspec->numTestCases++
-    not #test_case? lspec->numFailures++
+    lspec->getCurrentTest->status? return true
+    if(not #test_case) => {
+        lspec->numFailures++
+        lspec->getCurrentTest->status = 'fail'
+    }
 }

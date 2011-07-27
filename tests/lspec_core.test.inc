@@ -186,6 +186,7 @@ lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         expect(true)
+        expect(true)
     }
 }
 if(lspec->numSuccesses != 1) => {
@@ -193,12 +194,54 @@ if(lspec->numSuccesses != 1) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(lspec->numTestCases != 1) => {
+if(lspec->numTestCases != 2) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
 if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "Fails if one test case fails & increments [lspec->numFailures]"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(true)
+        expect(false)
+    }
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "Registers one test failing if multiple test cases fail"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(false)
+        expect(false)
+    }
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
