@@ -96,17 +96,6 @@ if(not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)) => {
 
 
 
-#test_desc = "A [describe] statement inserts into [lspec->result]"
-lspec_setupForTesting
-describe("Something") => {}
-if(lspec->result != "Something") => {
-    stdoutnl('Test Failed\n' + #test_desc)
-    stdoutnl(currentCapture->callStack->split('\n')->first)
-    abort
-}
-
-
-
 #test_desc = "The [lspec_clearSuite] clears the suite and the result but leaves options"
 // Completely reseting the lspec alias
 var_defined('_lspec') ? $_lspec = void
@@ -134,15 +123,10 @@ lspec_setupForTesting
 
 
 
-#test_desc = "Testing documentation output of a pending test & [lspec->numTests] & [lspec->numPending] increments while [lspec->numSuccesses] does not"
+#test_desc = "Testing a pending test: [lspec->numTests] & [lspec->numPending] increments while [lspec->numSuccesses] does not"
 lspec_setupForTesting
 describe("Something") => {
     it("does something") => {}
-}
-if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
-    stdoutnl('Test Failed\n' + #test_desc)
-    stdoutnl(currentCapture->callStack->split('\n')->first)
-    abort
 }
 if(lspec->numTests != 1) => {
     stdoutnl('Test Failed\n' + #test_desc)
@@ -197,17 +181,12 @@ if(not #success) => {
 
 
 
-#test_desc = "Increments [lspec->numSuccesses] & [lspec->numTestCases] and has the proper documentation output"
+#test_desc = "Basic successful test increments [lspec->numSuccesses] & [lspec->numTestCases]"
 lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         expect(true)
     }
-}
-if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
-    stdoutnl('Test Failed\n' + #test_desc)
-    stdoutnl(currentCapture->callStack->split('\n')->first)
-    abort
 }
 if(lspec->numSuccesses != 1) => {
     stdoutnl('Test Failed\n' + #test_desc)

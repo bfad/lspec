@@ -14,21 +14,24 @@ if(lspec->suite->first->numTests != 2) => {
 
 #test_desc = "Sub-test groups properly handled at the end of tests & outputed correctly"
 lspec_setupForTesting
+local(flag1, flag2) = (:false, false)
 describe("Something") => {
     it("Does something") => {}
     describe("As an aspect") => {
-        describe("Sub-aspect") => {}
-        it("Does something cool") => {}
+        #flag1 = true
+        describe("Sub-aspect") => {
+            #flag2 = true
+        }
+        it("Does something cool") => {
+            #flag2 = false
+        }
     }
-    it("Does something else") => {}
+    it("Does something else") => {
+        #flag1 = false
+        #flag2 = false
+    }
 }
-local(my_result) = 'Something
-' + lspec->indentor + 'Does something
-' + lspec->indentor + 'Does something else
-' + lspec->indentor + 'As an aspect
-' + lspec->indentor + lspec->indentor + 'Does something cool
-' + lspec->indentor + lspec->indentor + 'Sub-aspect'
-if(lspec->result != #my_result) => {
+if(not #flag1 or not #flag2) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

@@ -27,5 +27,8 @@ define lspec_setupForTesting => {
 local(f) = file(#path_here + 'lspec_core.test.inc')
 sourcefile(#f->readString, #f->path, true, false)->invoke
 
+local(f) = file(#path_here + 'lspec_output.test.inc')
+sourcefile(#f->readString, #f->path, true, false)->invoke
+
 local(f) = file(#path_here + 'lspec_testGroup.test.inc')
 sourcefile(#f->readString, #f->path, true, false)->invoke
