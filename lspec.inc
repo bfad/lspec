@@ -5,6 +5,8 @@
 *   test group => each [describe] style statement
 *   test suite => Compilation of all the test groups [lspec->suite]
 */
+define error_code_missingGivenBlock => 10
+define error_msg_missingGivenBlock  => 'This method requires a block'
 
 define error_code_lspecNotInTestGroup => 100
 define error_msg_lspecNotInTestGroup  => 'The test block is not encompassed in a test group block'
@@ -198,5 +200,21 @@ define expect => type {
         if(not #test_case) => {
             lspec->getCurrentTest->status = 'fail'
         }
+    }
+}
+
+define expect->error(code::integer, msg::string) => {
+    fail_if(not givenBlock,
+        error_code_missingGivenBlock, error_msg_missingGivenBlock)
+    protect => {
+        handle => {
+            if(error_code != #code or error_msg != #msg) => {
+                lspec->getCurrentTest->status = 'fail'
+            else
+                failure_clear
+                error_reset
+            }
+        }
+        givenBlock()
     }
 }
