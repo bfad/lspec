@@ -164,9 +164,11 @@ define lspec_test => type {
         if(lspec->numTestCases == #cur_cases) => {
             lspec->numPending++
             .status = 'pending'
-        else(lspec->numFailures == #cur_failures)
+        else(not .status)
             lspec->numSuccesses++
             .status = 'success'
+        else
+            lspec->numFailures++
         }
     }
 }
@@ -186,12 +188,15 @@ define it(label) => {
 }
 
 
-define expect(test_case::boolean) => {
-    fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
-    lspec->numTestCases++
-    lspec->getCurrentTest->status? return true
-    if(not #test_case) => {
-        lspec->numFailures++
-        lspec->getCurrentTest->status = 'fail'
+define expect => type {
+    public onCreate => {
+        fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
+        lspec->numTestCases++
+    }
+    public onCreate(test_case::boolean) => {
+        .onCreate
+        if(not #test_case) => {
+            lspec->getCurrentTest->status = 'fail'
+        }
     }
 }
