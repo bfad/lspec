@@ -249,6 +249,31 @@ if(lspec->numSuccesses != 0) => {
 
 
 
+#test_desc = "[it] test fails when an error is raised"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        5/0
+    }
+}
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
 #test_desc = "Tests for valid resultsFormat options"
 lspec_setupForTesting
 try => {

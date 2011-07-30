@@ -161,9 +161,24 @@ define lspec_test => type {
 
         lspec->inTest = true
         handle => { lspec->inTest = false }
-        .block->invoke
+        local(gb_error) = pair(0='No error')
+        protect => {
+            handle_error => { #gb_error = pair(error_code=error_msg) }
+            .block->invoke 
+        }
 
-        if(lspec->numTestCases == #cur_cases) => {
+        if((:error_code_missingGivenBlock,
+             error_code_lspecTestGroupInTest
+        )->contains(#gb_error->first)) => {
+            fail(#gb_error->first, #gb_error->second)
+        }
+
+        if(#gb_error != 0) => {
+            failure_clear
+            error_reset
+            lspec->numFailures++
+            .status = 'fail'
+        else(lspec->numTestCases == #cur_cases)
             lspec->numPending++
             .status = 'pending'
         else(not .status)
