@@ -167,13 +167,7 @@ define lspec_test => type {
             .block->invoke 
         }
 
-        if((:error_code_missingGivenBlock,
-             error_code_lspecTestGroupInTest
-        )->contains(#gb_error->first)) => {
-            fail(#gb_error->first, #gb_error->second)
-        }
-
-        if(#gb_error != 0) => {
+        if(#gb_error->first != 0) => {
             failure_clear
             error_reset
             lspec->numFailures++

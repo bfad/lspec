@@ -1,18 +1,13 @@
 // Expect extensions
 local(test_desc) = "[expect->error] raises an error if it's not passed a block"
 lspec_setupForTesting
-try => {
-    local(success) = false
-    handle(error_code == error_code_missingGivenBlock &&
-           error_msg  == error_msg_missingGivenBlock) => 
-    {
-        failure_clear
-        error_reset
-        #success = true
-    }
-
-    describe("Something") => {
-        it("Does something") => {
+describe("Something") => {
+    it("Does something") => {
+        try => {
+            local(success) = false
+            handle(error_code == error_code_missingGivenBlock &&
+                   error_msg  == error_msg_missingGivenBlock) => 
+            { #success = true }
             expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
         }
     }
@@ -37,11 +32,11 @@ if(lspec->numSuccesses != 0) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-/*if(lspec->numFailures != 1) => {
+if(lspec->numFailures != 1) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
-}*/
+}
 
 
 #test_desc = "[expect->error] passes when it gets the expected error"

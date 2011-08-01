@@ -33,23 +33,23 @@ try => {
 
 local(test_desc) = "It should throw an error if a [describe] method is inside an [it] method"
 lspec_setupForTesting
-try => {
-    local(success) = false
-    handle(error_code == error_code_lspecTestGroupInTest &&
-           error_msg  == error_msg_lspecTestGroupInTest) => 
-    {
-        failure_clear
-        error_reset
-        #success = true
-    }
-
-    describe("Something") => {
-        it("does something") => {
+describe("Something") => {
+    it("does something") => {
+        try => {
+            local(success) = false
+            handle(error_code == error_code_lspecTestGroupInTest &&
+                   error_msg  == error_msg_lspecTestGroupInTest) => 
+            { #success = true }
             describe("Should Fail") => {}
         }
     }
 }
 if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
