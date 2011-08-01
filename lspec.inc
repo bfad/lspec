@@ -215,15 +215,18 @@ define expect => type {
 define expect->error(code::integer, msg::string) => {
     fail_if(not givenBlock,
         error_code_missingGivenBlock, error_msg_missingGivenBlock)
+    
+    local(my_error) = pair(error_code_noerror=error_msg_noerror)
     protect => {
-        handle => {
-            if(error_code != #code or error_msg != #msg) => {
-                lspec->getCurrentTest->status = 'fail'
-            else
-                failure_clear
-                error_reset
-            }
-        }
+        handle_error => { #my_error = pair(error_code=error_msg) }
         givenBlock()
+    }
+    
+    if(#my_error->first != #code or #my_error->second != #msg) => {
+        lspec->getCurrentTest->status = 'fail'
+        fail(#my_error->first,#my_error->second)
+    else
+        failure_clear
+        error_reset
     }
 }
