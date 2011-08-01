@@ -230,3 +230,30 @@ define expect->error(code::integer, msg::string) => {
         error_reset
     }
 }
+
+define expect->stdout(expected::string) => {
+    fail_if(not givenBlock,
+        error_code_missingGivenBlock, error_msg_missingGivenBlock)
+    
+    // save stdout using ->dup
+    // create a local conduit
+    // close real stout, reopen it on our write pipe using dup2 system call
+    // make a file object here which we read stout from
+    local(save_stdout) = file_stdout->fd->dup
+    local(readFd, writeFd) = io_file_pipe
+    #writeFd->dup2(file_stdout->fd)
+    local(read_test) = file(#readFd)
+    
+    handle => {
+        // set stout back using our save
+        #save_stdout->dup2(file_stdout->fd)
+    }
+    
+    givenBlock()
+    
+    // read test data
+    local(did_read) = #read_test->readString
+    
+    #did_read != #expected? 
+        lspec->getCurrentTest->status = 'fail'
+}
