@@ -70,16 +70,23 @@ define lspec_impl => type {
         return .getCurrentTestGroup->tests->get(.getCurrentTestGroup->currentTest)
     }
     
+    public output(value::string) => {
+        .result += #value
+        not .suppressOutput? stdout(#value)
+    }
     public output(tg::lspec_testGroup) => {
         local(out) = (.indentor * .currentDepth) + #tg->label
-        .result != '' ? .result += '\n'
-        .result += #out
-        not .suppressOutput? stdout(#out)
+        .result != '' ? #out = '\n' + #out
+        .output(#out)
     }
     public output(test::lspec_test) => {
         local(out) = '\n' + (.indentor * .currentDepth) + .indentor + #test->label
-        .result += #out
-        not .suppressOutput? stdout(#out)
+        .output(#out)
+    }
+    
+    public outputStatus(status::string) => {
+        #status != 'fail'? return
+        .output(' (FAILED - ' + .numFailures + ')')
     }
     
     // Options Setters & Getters
@@ -181,6 +188,8 @@ define lspec_test => type {
         else
             lspec->numFailures++
         }
+        
+        lspec->outputStatus(.status)
     }
 }
 

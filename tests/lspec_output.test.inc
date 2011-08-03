@@ -60,3 +60,17 @@ if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
 }
 
 
+
+#test_desc = "Properly outputs a basic failed test in documentation format"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(false)
+    }
+}
+local(expected_result) = 'Something\n' + lspec->indentor + 'does something (FAILED - 1)'
+if(lspec->result != #expected_result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
