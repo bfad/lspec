@@ -31,7 +31,7 @@ try => {
     
 
 
-local(test_desc) = "It should throw an error if a [describe] method is inside an [it] method"
+#test_desc = "It should throw an error if a [describe] method is inside an [it] method"
 lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
@@ -350,5 +350,21 @@ local(didRead = #readTest->readString)
 if(#didRead != lspec->result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->runTime] is properly incremented for a test group"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        sleep(2000)
+    }
+}
+if(2 != (lspec->runTime / 1000000)) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    stdoutnl('Expected 2 but got ' + (lspec->runTime / 1000000))
     abort
 }

@@ -36,6 +36,7 @@ define lspec_impl => type {
          public numSuccesses = 0,
          public numFailures  = 0,
          public numPending   = 0,
+         public runTime      = 0,
          
          // Configuration Options
          private validFormats = (:'p', 'd'),
@@ -132,8 +133,12 @@ define lspec_testGroup => type {
     public numTests => .tests->size
     
     public run => {
+        local(start) = micros
         lspec->inTestGroup = true
-        handle => { lspec->inTestGroup = false }
+        handle => { 
+            lspec->inTestGroup = false
+            lspec->runTime += micros - #start
+        }
         
         lspec->output(self)
         .block->invoke
