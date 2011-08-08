@@ -16,8 +16,11 @@ define error_msg_lspecNotInTest  => "The test case is not encompassed in a test 
     
 define error_code_lspecTestGroupInTest => 102
 define error_msg_lspecTestGroupInTest  => "The test group is in a test block"
+
+define error_code_lspecStopInTestGroup => 103
+define error_msg_lspecStopInTestGroup  => "Can not stop while in a test group"
     
-define error_code_lspecInvalidResultFormat => 103
+define error_code_lspecInvalidResultFormat => 104
 define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
 
 
@@ -26,9 +29,10 @@ define lspec_impl => type {
          public result = string,
          
          // Flow status
-         public inTestGroup  = false,
-         public inTest       = false,
-         public currentDepth = 0,
+         public  inTestGroup  = false,
+         public  inTest       = false,
+         public  currentDepth = 0,
+         private done         = false,
          
          // Stats
          public numTests     = 0,
@@ -89,6 +93,21 @@ define lspec_impl => type {
         #status != 'fail'? return
         .output(' (FAILED - ' + .numFailures + ')')
     }
+    
+    public outputSummary => {
+        .output('\n\nFinished in ' + .runTime + ' seconds\n' + .numTests + ' test' + (.numTests == 1 ? '' | 's') + ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's'))
+    }
+    
+    
+    // Flow control
+    public stop => {
+        fail_if(.inTestGroup,
+            error_code_lspecStopInTestGroup, error_msg_lspecStopInTestGroup)
+        
+        .done = true
+        .outputSummary
+    }
+    public isStopped => .done
     
     // Options Setters & Getters
     public resultsFormat => .options->find('resultsFormat')
@@ -202,6 +221,9 @@ define lspec_test => type {
 define describe(label) => {
     fail_if(lspec->inTest, 
         error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
+    
+    lspec->isStopped? lspec_clearSuite
+    
     local(me) = lspec_testGroup(#label, givenBlock)
     lspec->addTestGroup(#me)
 }

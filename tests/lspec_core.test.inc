@@ -368,3 +368,130 @@ if(2 != (lspec->runTime / 1000000)) => {
     stdoutnl('Expected 2 but got ' + (lspec->runTime / 1000000))
     abort
 }
+
+
+
+#test_desc = "[lspec->stop] causes an error if called in a test group"
+lspec_setupForTesting
+describe("Something") => {
+    protect => {
+        local(success) = false
+        handle(error_code == error_code_lspecStopInTestGroup &&
+               error_msg  == error_msg_lspecStopInTestGroup) => 
+        { #success = true }
+        lspec->stop
+    }
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->stop] causes an error if called in a test and causes that test to fail"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        try => {
+            local(success) = false
+            handle(error_code == error_code_lspecStopInTestGroup &&
+                   error_msg  == error_msg_lspecStopInTestGroup) => 
+            { #success = true }
+            lspec->stop
+        }
+    }
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->stop] sets the [lspec->isStopped] flag"
+lspec_setupForTesting
+lspec->stop
+if(not lspec->isStopped) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->stop] outputs final summary"
+lspec_setupForTesting
+lspec->stop
+local(expected_result) = '\n\nFinished in ' + lspec->runTime + ' seconds\n0 tests, 0 failures'
+if(lspec->result != #expected_result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->stop] outputs test and failure in singular fashion for one test which also fails"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(false)
+    }
+}
+lspec->stop
+local(expected_result) = '\n\nFinished in ' + lspec->runTime + ' seconds\n1 test, 1 failure'
+if(not lspec->result->endsWith(#expected_result)) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "After [lspec->stop], a new [describe] causes an [lspec_clearSuite] (clears all but options)"
+lspec_setupForTesting
+describe("Something") => {
+    it("is pending") => {}
+    it("fails something") => { expect(false) }
+    it("has a success") => { expect(true) }
+}
+lspec->stop
+describe("Another thing") => {}
+if(lspec->result != "Another thing") => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(not lspec->suppressOutput) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numTests != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
