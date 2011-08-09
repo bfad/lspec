@@ -99,9 +99,13 @@ define lspec_impl => type {
         .output('\n\nFinished in ' + .runTime + ' seconds\n' + .numTests + ' test' + (.numTests == 1 ? '' | 's') + ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's'))
     }
     
+    public outputFailures => {
+        .output(.failures)
+    }
+    
     
     public testFailed(test::lspec_test) => {
-        local(spacer)    = ' ' * (.numTests->asString->size + 2)
+        local(spacer)    = ' ' * (.numFailures->asString->size + 2)
         local(file_path) = #test->failedTestCase->location->second
         local(line_num)  = integer(#test->failedTestCase->location->first->split(':')->first)
         local(col_num)   = integer(#test->failedTestCase->location->first->split(':')->second)
@@ -113,7 +117,7 @@ define lspec_impl => type {
         }
         .failures == ''? .failures += '\n\nFailures:'
         
-        .failures += '\n\n' + .indentor + .numTests + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .failures += '\n\n' + .indentor + .numFailures + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
         .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
         .failures += '\n' + .indentor + #spacer + lspec->indentor + 'expected: ' + #test->failedTestCase->val_expected
         .failures += '\n' + .indentor + #spacer + lspec->indentor + '     got: ' + #test->failedTestCase->val_actual
@@ -127,6 +131,7 @@ define lspec_impl => type {
             error_code_lspecStopInTestGroup, error_msg_lspecStopInTestGroup)
         
         .done = true
+        .outputFailures
         .outputSummary
     }
     public isStopped => .done

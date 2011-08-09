@@ -530,3 +530,36 @@ if(lspec->failures != #expected) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "[lspec->failures] is properly formatted for multiple failure"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something 1") => {
+        expect(false)
+    }
+    
+    it("does something 2") => {
+        expect(false)
+    }
+    
+    it("does something 3") => {
+        expect(false)
+    }
+}
+local(expected) = '\n\nFailures:'
+local(start_line) = 540
+loop(3) => {
+    #expected += '\n
+' + lspec->indentor + loop_count + ') Something does something ' + loop_count + '
+' + lspec->indentor + '   Failure/Error: expect(false)
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
+' + lspec->indentor + '   ' + lspec->indentor + '     got: false
+' + lspec->indentor + '   # ' + (#start_line + ((loop_count - 1)*4)) + ':9 ' + currentCapture->callsite_file
+}
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
