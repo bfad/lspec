@@ -25,8 +25,9 @@ define error_msg_lspecInvalidResultFormat  => "You have specified an invalid res
 
 
 define lspec_impl => type {
-    data public suite  = array,
-         public result = string,
+    data public suite    = array,
+         public result   = string,
+         public failures = '',
          
          // Flow status
          public  inTestGroup  = false,
@@ -96,6 +97,27 @@ define lspec_impl => type {
     
     public outputSummary => {
         .output('\n\nFinished in ' + .runTime + ' seconds\n' + .numTests + ' test' + (.numTests == 1 ? '' | 's') + ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's'))
+    }
+    
+    
+    public testFailed(test::lspec_test) => {
+        local(spacer)    = ' ' * (.numTests->asString->size + 2)
+        local(file_path) = #test->failedTestCase->location->second
+        local(line_num)  = integer(#test->failedTestCase->location->first->split(':')->first)
+        local(col_num)   = integer(#test->failedTestCase->location->first->split(':')->second)
+        local(code)      = ''
+        local(f) = file(#file_path, file_openRead, file_modeLine)
+        #f->doWithClose => {
+            loop(#line_num - 1) => {#f->get}
+            #code = #f->get->sub(#col_num)
+        }
+        .failures == ''? .failures += '\n\nFailures:'
+        
+        .failures += '\n\n' + .indentor + .numTests + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
+        .failures += '\n' + .indentor + #spacer + lspec->indentor + 'expected: ' + #test->failedTestCase->val_expected
+        .failures += '\n' + .indentor + #spacer + lspec->indentor + '     got: ' + #test->failedTestCase->val_actual
+        .failures += '\n' + .indentor + #spacer + '# ' + #test->failedTestCase->location->first + ' ' + #file_path
     }
     
     
@@ -177,7 +199,8 @@ define lspec_testGroup => type {
 define lspec_test => type {
     data public label::string,
          public block::capture,
-         public status::string
+         public status::string,
+         public failedTestCase::expect
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -211,6 +234,7 @@ define lspec_test => type {
             .status = 'success'
         else
             lspec->numFailures++
+            lspec->testFailed(self)
         }
         
         lspec->outputStatus(.status)
@@ -236,15 +260,38 @@ define it(label) => {
 
 
 define expect => type {
+    data public location,
+         public val_expected,
+         public val_actual
+    // Want getters but not setters
+    //public location     => .location
+    //public val_expected => .val_expected
+    //public val_actual   => .val_actual
+    
     public onCreate => {
         fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
         lspec->numTestCases++
+        
+        // We need to know where the expect came from
+        iterate(currentCapture->callStack->split('\n')) => {
+            local(line_col)  = loop_value->sub(1,loop_value->find(' ') - 1)
+            local(file_path) = loop_value->sub(1+loop_value->find(' '))
+            if(currentCapture->callsite_file != #file_path) => {
+                .location = pair(#line_col, #file_path)
+                loop_abort
+            }
+        }
     }
     public onCreate(test_case::boolean) => {
         .onCreate
-        if(not #test_case) => {
-            lspec->getCurrentTest->status = 'fail'
-        }
+        not #test_case? .fail('true', 'false')
+    }
+    
+    public fail(expected::string='', got::string='') => {
+        .val_expected = #expected
+        .val_actual   = #got
+        lspec->getCurrentTest->status = 'fail'
+        lspec->getCurrentTest->failedTestCase = self
     }
 }
 
@@ -259,7 +306,7 @@ define expect->error(code::integer, msg::string) => {
     }
     
     if(#my_error->first != #code or #my_error->second != #msg) => {
-        lspec->getCurrentTest->status = 'fail'
+        .fail
         fail(#my_error->first,#my_error->second)
     else
         failure_clear
@@ -290,6 +337,5 @@ define expect->stdout(expected::string) => {
     // read test data
     local(did_read) = #read_test->readString
     
-    #did_read != #expected? 
-        lspec->getCurrentTest->status = 'fail'
+    #did_read != #expected? .fail
 }

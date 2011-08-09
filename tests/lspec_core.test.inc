@@ -495,3 +495,38 @@ if(lspec->numFailures != 0) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "[lspec->failures] is blank when no tests have failed"
+lspec_setupForTesting
+describe("Something") => {
+    it("is pending") => {}
+    it("has a success") => { expect(true) }
+}
+if(lspec->failures != '') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->failures] is properly formatted for one failure"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(false)
+    }
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect(false)
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
+' + lspec->indentor + '   ' + lspec->indentor + '     got: false
+' + lspec->indentor + '   # 519:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
