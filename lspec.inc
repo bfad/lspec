@@ -265,13 +265,13 @@ define it(label) => {
 
 
 define expect => type {
-    data public location,
-         public val_expected,
-         public val_actual
+    data private location,
+         private val_expected,
+         private val_actual
     // Want getters but not setters
-    //public location     => .location
-    //public val_expected => .val_expected
-    //public val_actual   => .val_actual
+    public location     => .'location'
+    public val_expected => .'val_expected'
+    public val_actual   => .'val_actual'
     
     public onCreate => {
         fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
