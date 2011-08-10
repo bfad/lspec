@@ -97,7 +97,12 @@ define lspec_impl => type {
     }
     
     public outputSummary => {
-        .output('\n\nFinished in ' + .runTime + ' seconds\n' + .numTests + ' test' + (.numTests == 1 ? '' | 's') + ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's'))
+        local(summary) = '\n\nFinished in ' + .runTime + ' seconds\n'
+        #summary += .numTests + ' test' + (.numTests == 1 ? '' | 's')
+        #summary += ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's')
+        .numPending > 0?
+            #summary += ', ' + .numPending + ' pending'
+        .output(#summary)
     }
     
     public outputFailures => {

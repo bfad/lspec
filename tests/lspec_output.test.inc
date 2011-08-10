@@ -24,13 +24,13 @@ describe("Something") => {
     }
     it("Does something else") => {}
 }
-local(my_result) = 'Something
+local(expected) = 'Something
 ' + lspec->indentor + 'Does something
 ' + lspec->indentor + 'Does something else
 ' + lspec->indentor + 'As an aspect
 ' + lspec->indentor + lspec->indentor + 'Does something cool
 ' + lspec->indentor + lspec->indentor + 'Sub-aspect'
-if(lspec->result != #my_result) => {
+if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -43,7 +43,17 @@ lspec_setupForTesting
 describe("Something") => {
     it("does something") => {}
 }
-if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
+lspec->stop
+local(expected) = 'Something\n' + lspec->indentor + 'does something
+
+Pending:
+
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   ' + lspec->indentor + '# 44:5 ' + currentCapture->callsite_file + '
+
+Finished in ' + lspec->runTime + ' seconds
+1 test, 0 failures, 1 pending'
+if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -58,7 +68,12 @@ describe("Something") => {
         expect(true)
     }
 }
-if(lspec->result != 'Something\n' + lspec->indentor + 'does something') => {
+lspec->stop
+local(expected) = 'Something\n' + lspec->indentor + 'does something
+
+Finished in ' + lspec->runTime + ' seconds
+1 test, 0 failures'
+if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -82,7 +97,7 @@ Failures:
 ' + lspec->indentor + '   Failure/Error: expect(false)
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
 ' + lspec->indentor + '   ' + lspec->indentor + '     got: false
-' + lspec->indentor + '   # 73:9 ' + currentCapture->callsite_file + '
+' + lspec->indentor + '   # 88:9 ' + currentCapture->callsite_file + '
 
 Finished in ' + lspec->runTime + ' seconds
 1 test, 1 failure'
@@ -91,5 +106,3 @@ if(lspec->result != #expected) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-
-//micros / 1000000.0
