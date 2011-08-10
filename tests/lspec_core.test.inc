@@ -563,3 +563,25 @@ if(lspec->failures != #expected) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "[lspec->failures] is properly formatted for a failure due to an error"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        5/0
+        expect(true)
+    }
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: Unexpcted Error!
+' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
+' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
+' + lspec->indentor + '   # 572:5 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

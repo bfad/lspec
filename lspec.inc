@@ -104,24 +104,37 @@ define lspec_impl => type {
     }
     
     
-    public testFailed(test::lspec_test) => {
+    public testFailed(test::lspec_test, error=null, location=null) => {
+        not #location? #location = #test->failedTestCase->location
+            
         local(spacer)    = ' ' * (.numFailures->asString->size + 2)
-        local(file_path) = #test->failedTestCase->location->second
-        local(line_num)  = integer(#test->failedTestCase->location->first->split(':')->first)
-        local(col_num)   = integer(#test->failedTestCase->location->first->split(':')->second)
-        local(code)      = ''
-        local(f) = file(#file_path, file_openRead, file_modeLine)
-        #f->doWithClose => {
-            loop(#line_num - 1) => {#f->get}
-            #code = #f->get->sub(#col_num)
+        local(file_path) = #location->second
+        local(line_num)  = integer(#location->first->split(':')->first)
+        local(col_num)   = integer(#location->first->split(':')->second)
+        local(code)
+        
+        if(#error) => {
+            #code = 'Unexpcted Error!'
+        else
+            local(f) = file(#file_path, file_openRead, file_modeLine)
+            #f->doWithClose => {
+                loop(#line_num - 1) => {#f->get}
+                #code = #f->get->sub(#col_num)
+            }
         }
+        
         .failures == ''? .failures += '\n\nFailures:'
         
         .failures += '\n\n' + .indentor + .numFailures + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
         .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
-        .failures += '\n' + .indentor + #spacer + lspec->indentor + 'expected: ' + #test->failedTestCase->val_expected
-        .failures += '\n' + .indentor + #spacer + lspec->indentor + '     got: ' + #test->failedTestCase->val_actual
-        .failures += '\n' + .indentor + #spacer + '# ' + #test->failedTestCase->location->first + ' ' + #file_path
+        if(#error) => {
+            .failures += '\n' + .indentor + #spacer + lspec->indentor + 'Error Code: ' + #error->first
+            .failures += '\n' + .indentor + #spacer + lspec->indentor + ' Error Msg: ' + #error->second
+        else
+            .failures += '\n' + .indentor + #spacer + lspec->indentor + 'expected: ' + #test->failedTestCase->val_expected
+            .failures += '\n' + .indentor + #spacer + lspec->indentor + '     got: ' + #test->failedTestCase->val_actual
+        }
+        .failures += '\n' + .indentor + #spacer + '# ' + #location->first + ' ' + #file_path
     }
     
     
@@ -202,14 +215,26 @@ define lspec_testGroup => type {
 }
 
 define lspec_test => type {
-    data public label::string,
-         public block::capture,
-         public status::string,
-         public failedTestCase::expect
+    data public  label::string,
+         public  block::capture,
+         public  status::string,
+         private location::pair,
+         public  failedTestCase::expect
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
         .block = #gb
+        
+        // We need to know where the test came from in case of errors
+        // (Trying to get the error_stack in the handle method doesn't give us what we need)
+        iterate(currentCapture->callStack->split('\n')) => {
+            local(line_col)  = loop_value->sub(1,loop_value->find(' ') - 1)
+            local(file_path) = loop_value->sub(1+loop_value->find(' '))
+            if(currentCapture->callsite_file != #file_path) => {
+                .location = pair(#line_col, #file_path)
+                loop_abort
+            }
+        }
     }
     
     public run => {
@@ -223,14 +248,15 @@ define lspec_test => type {
         local(gb_error) = pair(0='No error')
         protect => {
             handle_error => { #gb_error = pair(error_code=error_msg) }
-            .block->invoke 
+            .block->invoke
         }
 
         if(#gb_error->first != 0) => {
             failure_clear
             error_reset
-            lspec->numFailures++
             .status = 'fail'
+            lspec->numFailures++
+            lspec->testFailed(self, #gb_error, .location)
         else(lspec->numTestCases == #cur_cases)
             lspec->numPending++
             .status = 'pending'
