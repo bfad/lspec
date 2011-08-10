@@ -74,7 +74,7 @@ describe("Something") => {
     }
 }
 lspec->stop
-local(expected_result) = 'Something\n' + lspec->indentor + 'does something (FAILED - 1)
+local(expected) = 'Something\n' + lspec->indentor + 'does something (FAILED - 1)
 
 Failures:
 
@@ -86,7 +86,7 @@ Failures:
 
 Finished in ' + lspec->runTime + ' seconds
 1 test, 1 failure'
-if(lspec->result != #expected_result) => {
+if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

@@ -585,3 +585,57 @@ if(lspec->failures != #expected) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "[lspec->pendings] is blank when no tests are pending"
+lspec_setupForTesting
+describe("Something") => {
+    it("has a success") => { expect(true) }
+    it("has a failure") => { expect(false) }
+}
+if(lspec->pendings != '') => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->pendings] is properly formatted for one pending"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {}
+}
+local(expected) = '\n\nPending:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   ' + lspec->indentor + '# 608:5 ' + currentCapture->callsite_file
+if(lspec->pendings != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[lspec->pendings] is properly formatted for multiple pending"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something 1") => {}
+    
+    it("does something 2") => {}
+    
+    it("does something 3") => {}
+}
+local(expected) = '\n\nPending:'
+local(start_line) = 624
+loop(3) => {
+    #expected += '\n
+' + lspec->indentor + loop_count + ') Something does something ' + loop_count + '
+' + lspec->indentor + '   ' + lspec->indentor + '# ' + (#start_line + ((loop_count - 1)*2)) + ':5 ' + currentCapture->callsite_file
+}
+if(lspec->pendings != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

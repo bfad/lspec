@@ -28,6 +28,7 @@ define lspec_impl => type {
     data public suite    = array,
          public result   = string,
          public failures = '',
+         public pendings = '',
          
          // Flow status
          public  inTestGroup  = false,
@@ -103,6 +104,8 @@ define lspec_impl => type {
         .output(.failures)
     }
     
+    public outputPendings => .output(.pendings)
+    
     
     public testFailed(test::lspec_test, error=null, location=null) => {
         not #location? #location = #test->failedTestCase->location
@@ -137,6 +140,15 @@ define lspec_impl => type {
         .failures += '\n' + .indentor + #spacer + '# ' + #location->first + ' ' + #file_path
     }
     
+    public testPending(test::lspec_test) => {
+        local(spacer)    = ' ' * (.numPending->asString->size + 2)
+        
+        .pendings == ''? .pendings += '\n\nPending:'
+        
+        .pendings += '\n\n' + .indentor + .numPending + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .pendings += '\n' + .indentor + #spacer + .indentor + '# ' + #test->location->first + ' ' + #test->location->second
+    }
+    
     
     // Flow control
     public stop => {
@@ -144,6 +156,7 @@ define lspec_impl => type {
             error_code_lspecStopInTestGroup, error_msg_lspecStopInTestGroup)
         
         .done = true
+        .outputPendings
         .outputFailures
         .outputSummary
     }
@@ -221,6 +234,9 @@ define lspec_test => type {
          private location::pair,
          public  failedTestCase::expect
     
+    // Getters
+    public location => .'location'
+    
     public onCreate(label, gb::capture) => {
         .label = #label->asString
         .block = #gb
@@ -258,8 +274,9 @@ define lspec_test => type {
             lspec->numFailures++
             lspec->testFailed(self, #gb_error, .location)
         else(lspec->numTestCases == #cur_cases)
-            lspec->numPending++
             .status = 'pending'
+            lspec->numPending++
+            lspec->testPending(self)
         else(not .status)
             lspec->numSuccesses++
             .status = 'success'
