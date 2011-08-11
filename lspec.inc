@@ -1,8 +1,23 @@
 /*
+   Copyright 2011 Bradley Lindsay
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/*
 * Terminology:
 *   test case  => each [expect] style statement
-*   test       => each [it]  style statement
-*   test group => each [describe] style statement
+*   test       => each [it] statement
+*   test group => each [describe] statement
 *   test suite => Compilation of all the test groups [lspec->suite]
 */
 define error_code_missingGivenBlock => 10
@@ -24,7 +39,7 @@ define error_code_lspecInvalidResultFormat => 104
 define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
 
 
-define lspec_impl => type {
+define lspec_testSuite => type {
     // Tallying up the test suite
     data private suite    = array,
          private result   = string,
@@ -234,23 +249,31 @@ define lspec_impl => type {
     public outputFailures => .output(.failures)
 }
 
-define lspec => var(_lspec) || var(_lspec) := lspec_impl
-// Could probably work around by throwing all the defaults into
-// an onCreate method and then calling that, but would prefer not to
-// as I'd have to remember to add every new data member to the oncreate
-// even if it would be to just set it up with void
+/*
+* Wrapper for the test suite.
+* This allows us to create one universal test suite object per thread. All
+* subsequent methods use this object, and so should users when necessary
+*/
+define lspec => var(_lspec) || var(_lspec) := lspec_testSuite
+
+/*
+* Method used to clear out the [lspec] test suite but leave formatting options in place.
+*/
 define lspec_clearSuite => {
     local(options) = lspec->options
-    var(_lspec) = lspec_impl
+    var(_lspec)    = lspec_testSuite
     $_lspec->setOptions(#options)
 }
 
+
+/*
+* The test group type
+*/
 define lspec_testGroup => type {
     data public label::string,
          public block::capture,
          public tests  = array,
          public groups = array,
-         // Status
          public currentTest = 0
     
     public onCreate(label, gb::capture) => {
@@ -283,6 +306,9 @@ define lspec_testGroup => type {
     }
 }
 
+/*
+* The test type
+*/
 define lspec_test => type {
     data public  label::string,
          public  block::capture,
@@ -343,17 +369,27 @@ define lspec_test => type {
 }
 
 
+/*
+* Wrapper for getting a test group into the test suite
+*/
 define describe(label) => {
-    local(me) = lspec_testGroup(#label, givenBlock)
-    lspec->addTestGroup(#me)
+    lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
 }
 
 
+/*
+* Wrapper for getting a test into the test suite
+*/
 define it(label) => {
     lspec->addTest(lspec_test(#label, givenBlock))
 }
 
 
+/*
+* The base expect type that can be extended for test cases
+* The base onCreate sets up everything that is needed before the test case runs
+* The onCreate that takes a boolean is the simplest test case - asserting true
+*/
 define expect => type {
     data private location,
          private val_expected,
@@ -389,6 +425,10 @@ define expect => type {
     }
 }
 
+/*
+* This expect statement catches any errors sent to its block and then
+* compares the error with the given expected error.
+*/
 define expect->error(code::integer, msg::string) => {
     fail_if(not givenBlock,
         error_code_missingGivenBlock, error_msg_missingGivenBlock)
@@ -408,6 +448,10 @@ define expect->error(code::integer, msg::string) => {
     }
 }
 
+/*
+* This expect statement catches whatever is sent to stdout in its block and
+* compares that with the given expected result.
+*/
 define expect->stdout(expected::string) => {
     fail_if(not givenBlock,
         error_code_missingGivenBlock, error_msg_missingGivenBlock)
@@ -416,19 +460,15 @@ define expect->stdout(expected::string) => {
     // create a local conduit
     // close real stdout, reopen it on our write pipe using dup2 system call
     // make a file object here which we read stdout from
-    local(save_stdout) = file_stdout->fd->dup
+    local(save_stdout)     = file_stdout->fd->dup
     local(readFd, writeFd) = io_file_pipe
     #writeFd->dup2(file_stdout->fd)
     local(read_test) = file(#readFd)
-    
-    handle => {
-        // set stdout back using our save
-        #save_stdout->dup2(file_stdout->fd)
-    }
+    // set stdout back using our save
+    handle => { #save_stdout->dup2(file_stdout->fd) }
     
     givenBlock()
     
-    // read test data
     local(did_read) = #read_test->readString
     
     #did_read != #expected? .fail(#expected, #did_read)
