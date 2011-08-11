@@ -270,11 +270,16 @@ define lspec_clearSuite => {
 * The test group type
 */
 define lspec_testGroup => type {
-    data public label::string,
-         public block::capture,
-         public tests  = array,
-         public groups = array,
-         public currentTest = 0
+    data private label::string,
+         private block::capture,
+         private tests  = array,
+         private groups = array,
+         private currentTest = 0
+     // Getters
+     public label       => .'label',
+            tests       => .'tests',
+            groups      => .'groups',
+            currentTest => .'currentTest'
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -310,14 +315,21 @@ define lspec_testGroup => type {
 * The test type
 */
 define lspec_test => type {
-    data public  label::string,
-         public  block::capture,
-         public  status::string,
+    data private label::string,
+         private block::capture,
+         private status::string,
          private location::pair,
-         public  failedTestCase::expect
-    
+         private failedTestCase::expect
     // Getters
-    public location => .'location'
+    public label          => .'label',
+           status         => .'status',
+           location       => .'location',
+           failedTestCase => .'failedTestCase'
+    // Setters
+    public failed(test_case::expect)   => {
+        .status = 'fail'
+        .failedTestCase = #test_case
+    }
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -420,8 +432,7 @@ define expect => type {
     public fail(expected::string='', got::string='') => {
         .val_expected = #expected
         .val_actual   = #got
-        lspec->getCurrentTest->status = 'fail'
-        lspec->getCurrentTest->failedTestCase = self
+        lspec->getCurrentTest->failed(self)
     }
 }
 
