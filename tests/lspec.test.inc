@@ -18,8 +18,8 @@ define try => {
 // Resets lspec for testing
 define lspec_setupForTesting => {
     var(_lspec) = void
-    lspec->resultsFormat = 'd'
-    lspec->suppressOutput = true
+    lspec->formatResults('d')
+    lspec->suppressOutput
 }
 
 

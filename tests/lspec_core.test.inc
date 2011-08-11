@@ -99,9 +99,9 @@ if(not lspec->suite->get(#num_before + 1)->isA(::lspec_testGroup)) => {
 #test_desc = "The [lspec_clearSuite] clears the suite and the result but leaves options"
 // Completely reseting the lspec alias
 var_defined('_lspec') ? $_lspec = void
-lspec->resultsFormat = 'd'
-lspec->indentor       = ' '
-lspec->suppressOutput = true
+lspec->formatResults('d')
+lspec->indentor(' ')
+lspec->suppressOutput
 describe("Something") => {}
 lspec_clearSuite
 if(lspec->suite->size != 0) => {
@@ -286,15 +286,15 @@ try => {
         #success = true
     }
     
-    lspec->resultsFormat = '#'
+    lspec->formatResults('#')
     if(not #success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
-lspec->resultsFormat = 'p'
-lspec->resultsFormat = 'd'
+lspec->formatResults('p')
+lspec->formatResults('d')
 
 
 
@@ -328,7 +328,7 @@ if(#didRead != '') => {
 
 #test_desc = "Output is properly not suppressed"
 lspec_setupForTesting
-lspec->suppressOutput = false
+lspec->showOutput
 // save stdout using ->dup
 local(saveStdout = file_stdout->fd->dup)
 // create a local conduit
@@ -470,7 +470,7 @@ if(lspec->result != "Another thing") => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(not lspec->suppressOutput) => {
+if(not lspec->isOutputSuppressed) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

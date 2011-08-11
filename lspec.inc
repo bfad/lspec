@@ -25,61 +25,174 @@ define error_msg_lspecInvalidResultFormat  => "You have specified an invalid res
 
 
 define lspec_impl => type {
-    data public suite    = array,
-         public result   = string,
-         public failures = '',
-         public pendings = '',
+    // Tallying up the test suite
+    data private suite    = array,
+         private result   = string,
+         private failures = '',
+         private pendings = ''
+    // Tally Getters
+    public suite    => .'suite',
+           result   => .'result',
+           failures => .'failures',
+           pendings => .'pendings'
          
-         // Flow status
-         public  inTestGroup  = false,
-         public  inTest       = false,
-         public  currentDepth = 0,
-         private done         = false,
+    // Flow status
+    data private inTestGroup  = false,
+         private inTest       = false,
+         private currentDepth = 0,
+         private done         = false
+    // Flow "Setters"
+    public enterTestGroup => { .inTestGroup = true  },
+           leaveTestGroup => { .inTestGroup = false },
+           enterTest      => { .inTest = true  },
+           leaveTest      => { .inTest = false },
+           incGroupDepth  => .currentDepth++,
+           decGroupDepth  => .currentDepth--,
+           isStopped      => .done
+    public stop => {
+        fail_if(.inTestGroup,
+            error_code_lspecStopInTestGroup, error_msg_lspecStopInTestGroup)
+        .done = true
+        .outputPendings
+        .outputFailures
+        .outputSummary
+    }
          
-         // Stats
-         public numTests     = 0,
-         public numTestCases = 0,
-         public numSuccesses = 0,
-         public numFailures  = 0,
-         public numPending   = 0,
-         public runTime      = 0,
+    // Stats
+    data private numTests     = 0,
+         private numTestCases = 0,
+         private numSuccesses = 0,
+         private numFailures  = 0,
+         private numPending   = 0,
+         private runTime      = 0
+    // Stats Getters and Setters
+     public numTests     => .'numTests',
+            numTestCases => .'numTestCases',
+            numSuccesses => .'numSuccesses',
+            numFailures  => .'numFailures',
+            numPending   => .'numPending',
+            runTime      => .'runTime',
+            runTime(time::integer) => { .'runTime' += #time }
          
-         // Configuration Options
-         private validFormats = (:'p', 'd'),
-         public  options      = map(
+    // Configuration Options
+    data private validFormats = (:'p', 'd'),
+         private options      = map(
                     'resultsFormat'  = "p",
                     'indentor'       = "    ",
                     'suppressOutput' = false,
          )
+    // Configuration Options Setters & Getters
+    public options => .'options'
+    public setOptions(new::map) => {
+        with key in .'options'->keys 
+        do {
+            #new->contains(#key)? .'options'->find(#key) = #new->find(#key)
+        }
+    }
+    public indentor => .options->find('indentor'),
+           indentor(new::string) => { .options->find('indentor') = #new }
+       
+    public isOutputSuppressed =>   .options->find('suppressOutput'),
+           suppressOutput     => { .options->find('suppressOutput') = true  },
+           showOutput         => { .options->find('suppressOutput') = false }
+           
+    public resultsFormat => .options->find('resultsFormat')
+    public formatResults(new::string) => {
+        fail_if(not .validFormats->contains(#new), 
+            error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
+        .options->find('resultsFormat') = #new
+    }
     
+    
+    // Code to add test stuff to lspec test suite
     public addTestGroup(tg::lspec_testGroup) => {
+        fail_if(.inTest, error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
+
+        lspec->isStopped? lspec_clearSuite
+        
         if(.inTestGroup) => {
             .getCurrentTestGroup->groups->insert(#tg)
         else
-            lspec->suite->insert(#tg)
+            .suite->insert(#tg)
             #tg->run
         }
     }
     public addTest(test::lspec_test) => {
+        fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
         .getCurrentTestGroup->tests->insert(#test)
         .numTests++
     }
+    public addTestCase => {
+        fail_if(not .inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
+        .numTestCases++
+    }
     
+    
+    // Test suite location methods
     private getCurrentTestGroup => {
-        local(ret_val) = lspec->suite->last
+        local(ret_val) = .suite->last
         loop(.currentDepth) => {
             #ret_val = #ret_val->groups->last
         }
         return #ret_val
     }
-    
     public getCurrentTest => {
         return .getCurrentTestGroup->tests->get(.getCurrentTestGroup->currentTest)
     }
     
+    
+    // Completed test status code
+    public testPending(test::lspec_test) => {
+        .numPending++
+        
+        local(spacer)    = ' ' * (.numPending->asString->size + 2)
+        
+        .pendings == ''? .pendings += '\n\nPending:'
+        
+        .pendings += '\n\n' + .indentor + .numPending + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .pendings += '\n' + .indentor + #spacer + .indentor + '# ' + #test->location->first + ' ' + #test->location->second
+    }
+    
+    public testSucceeded => .numSuccesses++
+    
+    public testFailed(test::lspec_test, error=null) => {
+        .numFailures++
+        
+        local(spacer)    = ' ' * (.numFailures->asString->size + 2)
+        local(location)  = (not #error ? #test->failedTestCase->location | #test->location)
+        local(line_num)  = integer(#location->first->split(':')->first)
+        local(col_num)   = integer(#location->first->split(':')->second)
+        local(code)
+        
+        if(#error) => {
+            #code = 'Unexpcted Error!'
+        else
+            local(f) = file(#location->second, file_openRead, file_modeLine)
+            #f->doWithClose => {
+                loop(#line_num - 1) => {#f->get}
+                #code = #f->get->sub(#col_num)
+            }
+        }
+        
+        .failures == ''? .failures += '\n\nFailures:'
+        
+        .failures += '\n\n' + .indentor + .numFailures + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
+        if(#error) => {
+            .failures += '\n' + .indentor + #spacer + .indentor + 'Error Code: ' + #error->first
+            .failures += '\n' + .indentor + #spacer + .indentor + ' Error Msg: ' + #error->second
+        else
+            .failures += '\n' + .indentor + #spacer + .indentor + 'expected: ' + #test->failedTestCase->val_expected
+            .failures += '\n' + .indentor + #spacer + .indentor + '     got: ' + #test->failedTestCase->val_actual
+        }
+        .failures += '\n' + .indentor + #spacer + '# ' + #location->first + ' ' + #location->second
+    }
+    
+    
+    // Test suite output code
     public output(value::string) => {
         .result += #value
-        not .suppressOutput? stdout(#value)
+        not .isOutputSuppressed? stdout(#value)
     }
     public output(tg::lspec_testGroup) => {
         local(out) = (.indentor * .currentDepth) + #tg->label
@@ -104,83 +217,8 @@ define lspec_impl => type {
             #summary += ', ' + .numPending + ' pending'
         .output(#summary)
     }
-    
-    public outputFailures => {
-        .output(.failures)
-    }
-    
     public outputPendings => .output(.pendings)
-    
-    
-    public testFailed(test::lspec_test, error=null, location=null) => {
-        not #location? #location = #test->failedTestCase->location
-            
-        local(spacer)    = ' ' * (.numFailures->asString->size + 2)
-        local(file_path) = #location->second
-        local(line_num)  = integer(#location->first->split(':')->first)
-        local(col_num)   = integer(#location->first->split(':')->second)
-        local(code)
-        
-        if(#error) => {
-            #code = 'Unexpcted Error!'
-        else
-            local(f) = file(#file_path, file_openRead, file_modeLine)
-            #f->doWithClose => {
-                loop(#line_num - 1) => {#f->get}
-                #code = #f->get->sub(#col_num)
-            }
-        }
-        
-        .failures == ''? .failures += '\n\nFailures:'
-        
-        .failures += '\n\n' + .indentor + .numFailures + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
-        .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
-        if(#error) => {
-            .failures += '\n' + .indentor + #spacer + lspec->indentor + 'Error Code: ' + #error->first
-            .failures += '\n' + .indentor + #spacer + lspec->indentor + ' Error Msg: ' + #error->second
-        else
-            .failures += '\n' + .indentor + #spacer + lspec->indentor + 'expected: ' + #test->failedTestCase->val_expected
-            .failures += '\n' + .indentor + #spacer + lspec->indentor + '     got: ' + #test->failedTestCase->val_actual
-        }
-        .failures += '\n' + .indentor + #spacer + '# ' + #location->first + ' ' + #file_path
-    }
-    
-    public testPending(test::lspec_test) => {
-        local(spacer)    = ' ' * (.numPending->asString->size + 2)
-        
-        .pendings == ''? .pendings += '\n\nPending:'
-        
-        .pendings += '\n\n' + .indentor + .numPending + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
-        .pendings += '\n' + .indentor + #spacer + .indentor + '# ' + #test->location->first + ' ' + #test->location->second
-    }
-    
-    
-    // Flow control
-    public stop => {
-        fail_if(.inTestGroup,
-            error_code_lspecStopInTestGroup, error_msg_lspecStopInTestGroup)
-        
-        .done = true
-        .outputPendings
-        .outputFailures
-        .outputSummary
-    }
-    public isStopped => .done
-    
-    // Options Setters & Getters
-    public resultsFormat => .options->find('resultsFormat')
-    public resultsFormat=(rhs::string) => {
-        fail_if(not .validFormats->contains(#rhs), 
-            error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
-        
-        .options->find('resultsFormat') = #rhs
-    }
-    
-    public indentor => .options->find('indentor')
-    public indentor=(rhs::string) => { .options->find('indentor') = #rhs }
-    
-    public suppressOutput => .options->find('suppressOutput')
-    public suppressOutput=(rhs::boolean) => { .options->find('suppressOutput') = #rhs }
+    public outputFailures => .output(.failures)
 }
 
 define lspec => var(_lspec) || var(_lspec) := lspec_impl
@@ -191,7 +229,7 @@ define lspec => var(_lspec) || var(_lspec) := lspec_impl
 define lspec_clearSuite => {
     local(options) = lspec->options
     var(_lspec) = lspec_impl
-    $_lspec->options = #options
+    $_lspec->setOptions(#options)
 }
 
 define lspec_testGroup => type {
@@ -211,10 +249,10 @@ define lspec_testGroup => type {
     
     public run => {
         local(start) = micros
-        lspec->inTestGroup = true
+        lspec->enterTestGroup
         handle => { 
-            lspec->inTestGroup = false
-            lspec->runTime += micros - #start
+            lspec->leaveTestGroup
+            lspec->runTime(micros - #start)
         }
         
         lspec->output(self)
@@ -225,9 +263,9 @@ define lspec_testGroup => type {
             #1->run
         }
         .groups->forEach => {
-            lspec->currentDepth++
+            lspec->incGroupDepth
             #1->run 
-            lspec->currentDepth--
+            lspec->decGroupDepth
         }
     }
 }
@@ -264,8 +302,8 @@ define lspec_test => type {
 
         lspec->output(self)
 
-        lspec->inTest = true
-        handle => { lspec->inTest = false }
+        lspec->enterTest
+        handle => { lspec->leaveTest }
         local(gb_error) = pair(0='No error')
         protect => {
             handle_error => { #gb_error = pair(error_code=error_msg) }
@@ -276,17 +314,14 @@ define lspec_test => type {
             failure_clear
             error_reset
             .status = 'fail'
-            lspec->numFailures++
-            lspec->testFailed(self, #gb_error, .location)
+            lspec->testFailed(self, #gb_error)
         else(lspec->numTestCases == #cur_cases)
             .status = 'pending'
-            lspec->numPending++
             lspec->testPending(self)
         else(not .status)
-            lspec->numSuccesses++
             .status = 'success'
+            lspec->testSucceeded
         else
-            lspec->numFailures++
             lspec->testFailed(self)
         }
         
@@ -296,18 +331,12 @@ define lspec_test => type {
 
 
 define describe(label) => {
-    fail_if(lspec->inTest, 
-        error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
-    
-    lspec->isStopped? lspec_clearSuite
-    
     local(me) = lspec_testGroup(#label, givenBlock)
     lspec->addTestGroup(#me)
 }
 
 
 define it(label) => {
-    fail_if(not lspec->inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
     lspec->addTest(lspec_test(#label, givenBlock))
 }
 
@@ -322,8 +351,7 @@ define expect => type {
     public val_actual   => .'val_actual'
     
     public onCreate => {
-        fail_if(not lspec->inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
-        lspec->numTestCases++
+        lspec->addTestCase
         
         // We need to know where the expect came from
         iterate(currentCapture->callStack->split('\n')) => {
@@ -373,15 +401,15 @@ define expect->stdout(expected::string) => {
     
     // save stdout using ->dup
     // create a local conduit
-    // close real stout, reopen it on our write pipe using dup2 system call
-    // make a file object here which we read stout from
+    // close real stdout, reopen it on our write pipe using dup2 system call
+    // make a file object here which we read stdout from
     local(save_stdout) = file_stdout->fd->dup
     local(readFd, writeFd) = io_file_pipe
     #writeFd->dup2(file_stdout->fd)
     local(read_test) = file(#readFd)
     
     handle => {
-        // set stout back using our save
+        // set stdout back using our save
         #save_stdout->dup2(file_stdout->fd)
     }
     
