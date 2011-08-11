@@ -195,18 +195,31 @@ define lspec_impl => type {
         not .isOutputSuppressed? stdout(#value)
     }
     public output(tg::lspec_testGroup) => {
+        'p' == .resultsFormat? return
+        
         local(out) = (.indentor * .currentDepth) + #tg->label
         .result != '' ? #out = '\n' + #out
         .output(#out)
     }
     public output(test::lspec_test) => {
+        'p' == .resultsFormat? return
+        
         local(out) = '\n' + (.indentor * .currentDepth) + .indentor + #test->label
         .output(#out)
     }
     
     public outputStatus(status::string) => {
-        #status != 'fail'? return
-        .output(' (FAILED - ' + .numFailures + ')')
+        match(.resultsFormat) => {
+        case('d')
+            #status != 'fail'? return
+            .output(' (FAILED - ' + .numFailures + ')')
+        case('p')
+            match(#status) => {
+            case('pending') .output('*')
+            case('success') .output('.')
+            case('fail')    .output('F')
+            }
+        }
     }
     
     public outputSummary => {
