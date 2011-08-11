@@ -72,15 +72,15 @@ if(lspec->numFailures != 0) => {
 
 
 
-#test_desc = "[expect->error] fails when it gets an unexpected error & re-raises it"
+#test_desc = "[expect->error] fails when it gets an unexpected error & doesn't re-raise it"
 lspec_setupForTesting
 describe("Something") => {
-    it("Does something") => {
+    it("does something") => {
         try => {
-            local(success) = false
+            local(success) = true
             handle(error_code == error_code_divideByZero &&
                    error_msg  == error_msg_divideByZero) => 
-            { #success = true }
+            { #success = false }
             expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup) => {
                 5/0
             }
@@ -108,6 +108,17 @@ if(lspec->numSuccesses != 0) => {
     abort
 }
 if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup) => {
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: ' + error_code_lspecNotInTestGroup + ': ' + error_msg_lspecNotInTestGroup + '
+' + lspec->indentor + '   ' + lspec->indentor + '     got: ' + error_code_divideByZero + ': ' + error_msg_divideByZero + '
+' + lspec->indentor + '   # 84:13 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -142,6 +153,18 @@ if(lspec->numFailures != 1) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup) => {}
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: ' + error_code_lspecNotInTestGroup + ': ' + error_msg_lspecNotInTestGroup + '
+' + lspec->indentor + '   ' + lspec->indentor + '     got: ' + error_code_noerror + ': ' + error_msg_noerror + '
+' + lspec->indentor + '   # 133:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
 
 
 // [expect->stdout] //
@@ -281,6 +304,17 @@ if(lspec->numFailures != 1) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something Does something
+' + lspec->indentor + '   Failure/Error: Unexpcted Error!
+' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
+' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
+' + lspec->indentor + '   # 270:5 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
 
 
 
@@ -307,6 +341,17 @@ if(lspec->numSuccesses != 0) => {
     abort
 }
 if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect->stdout(\'Lager, sir, is regal.\') => {}
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: Lager, sir, is regal.
+' + lspec->indentor + '   ' + lspec->indentor + '     got: 
+' + lspec->indentor + '   # 325:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

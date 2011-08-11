@@ -386,12 +386,12 @@ define expect->error(code::integer, msg::string) => {
         givenBlock()
     }
     
+    failure_clear
+    error_reset
+    
     if(#my_error->first != #code or #my_error->second != #msg) => {
-        .fail
-        fail(#my_error->first,#my_error->second)
-    else
-        failure_clear
-        error_reset
+        .fail(#code + ': ' + #msg,
+              #my_error->first + ': ' + #my_error->second)
     }
 }
 
@@ -418,5 +418,5 @@ define expect->stdout(expected::string) => {
     // read test data
     local(did_read) = #read_test->readString
     
-    #did_read != #expected? .fail
+    #did_read != #expected? .fail(#expected, #did_read)
 }
