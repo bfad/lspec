@@ -15,10 +15,10 @@
 */
 /*
 * Terminology:
-*   test case  => each [expect] style statement
-*   test       => each [it] statement
-*   test group => each [describe] statement
-*   test suite => Compilation of all the test groups [lspec->suite]
+*   expectation => each [expect] style statement
+*   test        => each [it] statement
+*   test group  => each [describe] statement
+*   test suite  => Compilation of all the test groups [lspec->suite]
 */
 define error_code_missingGivenBlock => 10
 define error_msg_missingGivenBlock  => 'This method requires a block'
@@ -429,7 +429,7 @@ define expect => type {
         not #test_case? .fail('true', 'false')
     }
     
-    public fail(expected::string='', got::string='') => {
+    private fail(expected::string='', got::string='') => {
         .val_expected = #expected
         .val_actual   = #got
         lspec->getCurrentTest->failed(self)
