@@ -151,6 +151,16 @@ define lspec_testSuite => type {
         }
         return #ret_val
     }
+    private currentTGroupLabels => {
+        local(test_group) = .suite->last
+        local(ret_val)    = ''
+        loop(.currentDepth) => {
+            #ret_val   += #test_group->label + ' '
+            #test_group = #test_group->groups->last
+        }
+        #ret_val += #test_group->label
+        return #ret_val
+    }
     public getCurrentTest => {
         return .getCurrentTestGroup->tests->get(.getCurrentTestGroup->currentTest)
     }
@@ -191,7 +201,7 @@ define lspec_testSuite => type {
         
         .failures == ''? .failures += '\n\nFailures:'
         
-        .failures += '\n\n' + .indentor + .numFailures + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
+        .failures += '\n\n' + .indentor + .numFailures + ') ' + .currentTGroupLabels + ' ' + #test->label
         .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
         if(#error) => {
             .failures += '\n' + .indentor + #spacer + .indentor + 'Error Code: ' + #error->first
@@ -238,7 +248,7 @@ define lspec_testSuite => type {
     }
     
     public outputSummary => {
-        local(summary) = '\n\nFinished in ' + .runTime + ' seconds\n'
+        local(summary) = '\n\nFinished in ' + (.runTime / 1000000.0) + ' seconds\n'
         #summary += .numTests + ' test' + (.numTests == 1 ? '' | 's')
         #summary += ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's')
         .numPending > 0?

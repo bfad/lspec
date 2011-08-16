@@ -587,6 +587,28 @@ if(lspec->failures != #expected) => {
 }
 
 
+#test_desc = "[lspec->failures] is properly formatted for a failure in a nested describe"
+lspec_setupForTesting
+describe("Something") => {
+    describe("calls something") => {
+        it("does something") => {
+            expect(false)
+        }
+    }
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something calls something does something
+' + lspec->indentor + '   Failure/Error: expect(false)
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
+' + lspec->indentor + '   ' + lspec->indentor + '     got: false
+' + lspec->indentor + '   # 595:13 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
 
 #test_desc = "[lspec->pendings] is blank when no tests are pending"
 lspec_setupForTesting
@@ -609,7 +631,7 @@ describe("Something") => {
 }
 local(expected) = '\n\nPending:\n
 ' + lspec->indentor + '1) Something does something
-' + lspec->indentor + '   ' + lspec->indentor + '# 608:5 ' + currentCapture->callsite_file
+' + lspec->indentor + '   ' + lspec->indentor + '# 630:5 ' + currentCapture->callsite_file
 if(lspec->pendings != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -628,7 +650,7 @@ describe("Something") => {
     it("does something 3") => {}
 }
 local(expected) = '\n\nPending:'
-local(start_line) = 624
+local(start_line) = 646
 loop(3) => {
     #expected += '\n
 ' + lspec->indentor + loop_count + ') Something does something ' + loop_count + '
