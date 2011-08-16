@@ -99,7 +99,7 @@ endif
 #BC_LIST = $(addsuffix $(BC_EXT), $(STD_LIST) $(COMPAT_DEPS_LIST))
 
 #all: base lasso9
-all: $(MAKE_TARGET)
+all: $(MAKE_TARGET)$(DLL_EXT)
 	
 
 debug:
@@ -149,10 +149,8 @@ else
 	$(AS) -o $@ $<
 endif
 
-#%$(DLL_EXT): %.d.o
-%: %.d.o
-#	$(CC) $(ARCH_PART) $(DLL_FLAGS) $(LN_FLAGS) -o $@ $< #> /dev/null 2>&1
-	$(CC) $(ARCH_PART) $(DLL_FLAGS) $(LN_FLAGS) -o $@$(DLL_EXT) $< #> /dev/null 2>&1
+%$(DLL_EXT): %.d.o
+	$(CC) $(ARCH_PART) $(DLL_FLAGS) $(LN_FLAGS) -o $@ $< #> /dev/null 2>&1
 #	@mkdir -p "$(LINK_DST)"
 #	@mkdir -p "$(LINK_DST)/compat"
 	$(DEBUG_CMD)
