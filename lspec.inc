@@ -398,6 +398,9 @@ define lspec_test => type {
 define describe(label) => {
     lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
 }
+define context(label) =>  {
+    lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
+}
 
 
 /*
