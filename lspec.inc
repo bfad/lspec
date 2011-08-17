@@ -442,6 +442,10 @@ define expect => type {
         .onCreate
         not #test_case? .fail('true', 'false')
     }
+    public onCreate(expect, got) => {
+        .onCreate
+        #expect != #got? .fail(#expect->asString, #got->asString)
+    }
     
     private fail(expected::string='', got::string='') => {
         .val_expected = #expected

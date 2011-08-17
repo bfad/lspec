@@ -18,9 +18,9 @@ describe('rspec command') => {
             #stdout = #my_process->read
             #stderr = #my_process->readError
             
-            expect('' == #test_file->readString)
+            expect('', #test_file->readString)
             expect->null(#stderr)
-            expect(#expected == #stdout)
+            expect(#expected, #stdout)
         }
     }
 }
