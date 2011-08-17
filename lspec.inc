@@ -438,13 +438,12 @@ define expect => type {
             }
         }
     }
-    public onCreate(test_case::boolean) => {
+    public onCreate(test_case::boolean, expected::string='true', got::string='false') => {
         .onCreate
-        not #test_case? .fail('true', 'false')
+        not #test_case? .fail(#expected, #got)
     }
-    public onCreate(expect, got) => {
-        .onCreate
-        #expect != #got? .fail(#expect->asString, #got->asString)
+    public onCreate(expected, got) => {
+        .onCreate(#expected == #got, #expected->asString, #got->asString)
     }
     
     private fail(expected::string='', got::string='') => {
