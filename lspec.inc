@@ -451,6 +451,14 @@ define expect => type {
 }
 
 /*
+* This expect statement expects a null value to be passed into it
+*/
+define expect->null(value) => {
+    not #value->isA(::null)?
+        .fail('null', '"' + #value + '"')
+}
+
+/*
 * This expect statement catches any errors sent to its block and then
 * compares the error with the given expected error.
 */
