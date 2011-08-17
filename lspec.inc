@@ -87,6 +87,7 @@ define lspec_testSuite => type {
             numFailures  => .'numFailures',
             numPending   => .'numPending',
             runTime      => .'runTime',
+            runTimeSec   => .'runTime' / 1000000.0,
             runTime(time::integer) => { .'runTime' += #time }
          
     // Configuration Options
@@ -248,7 +249,7 @@ define lspec_testSuite => type {
     }
     
     public outputSummary => {
-        local(summary) = '\n\nFinished in ' + (.runTime / 1000000.0) + ' seconds\n'
+        local(summary) = '\n\nFinished in ' + .runTimeSec + ' seconds\n'
         #summary += .numTests + ' test' + (.numTests == 1 ? '' | 's')
         #summary += ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's')
         .numPending > 0?
@@ -264,7 +265,7 @@ define lspec_testSuite => type {
 * This allows us to create one universal test suite object per thread. All
 * subsequent methods use this object, and so should users when necessary
 */
-define lspec => var(_lspec) || var(_lspec) := lspec_testSuite
+define lspec => var(_lspec) || $_lspec := lspec_testSuite
 
 /*
 * Method used to clear out the [lspec] test suite but leave formatting options in place.

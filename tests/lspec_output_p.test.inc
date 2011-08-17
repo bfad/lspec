@@ -50,7 +50,7 @@ Pending:
 ' + lspec->indentor + '1) Something does something
 ' + lspec->indentor + '   ' + lspec->indentor + '# 43:5 ' + currentCapture->callsite_file + '
 
-Finished in ' + lspec->runTime + ' seconds
+Finished in ' + lspec->runTimeSec + ' seconds
 1 test, 0 failures, 1 pending'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
@@ -71,7 +71,7 @@ describe("Something") => {
 lspec->stop
 local(expected) = '.
 
-Finished in ' + lspec->runTime + ' seconds
+Finished in ' + lspec->runTimeSec + ' seconds
 1 test, 0 failures'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
@@ -100,7 +100,7 @@ Failures:
 ' + lspec->indentor + '   ' + lspec->indentor + '     got: false
 ' + lspec->indentor + '   # 89:9 ' + currentCapture->callsite_file + '
 
-Finished in ' + lspec->runTime + ' seconds
+Finished in ' + lspec->runTimeSec + ' seconds
 1 test, 1 failure'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
