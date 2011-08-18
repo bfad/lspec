@@ -145,10 +145,10 @@ define lspec_testSuite => type {
     
     
     // Test suite location methods
-    private getCurrentTestGroup => {
+    public getCurrentTestGroup => {
         local(ret_val) = .suite->last
         loop(.currentDepth) => {
-            #ret_val = #ret_val->groups->last
+            #ret_val = #ret_val->groups->get(#ret_val->currentGroup)
         }
         return #ret_val
     }
@@ -157,7 +157,7 @@ define lspec_testSuite => type {
         local(ret_val)    = ''
         loop(.currentDepth) => {
             #ret_val   += #test_group->label + ' '
-            #test_group = #test_group->groups->last
+            #test_group = #test_group->groups->get(#test_group->currentGroup)
         }
         #ret_val += #test_group->label
         return #ret_val
@@ -285,12 +285,14 @@ define lspec_testGroup => type {
          private block::capture,
          private tests  = array,
          private groups = array,
-         private currentTest = 0
+         private currentTest  = 0,
+         private currentGroup = 0
      // Getters
-     public label       => .'label',
-            tests       => .'tests',
-            groups      => .'groups',
-            currentTest => .'currentTest'
+     public label        => .'label',
+            tests        => .'tests',
+            groups       => .'groups',
+            currentTest  => .'currentTest',
+            currentGroup => .'currentGroup'
     
     public onCreate(label, gb::capture) => {
         .label = #label->asString
@@ -314,7 +316,9 @@ define lspec_testGroup => type {
             .currentTest++
             #1->run
         }
+        .currentGroup = 0
         .groups->forEach => {
+            .currentGroup++
             lspec->incGroupDepth
             #1->run 
             lspec->decGroupDepth
