@@ -137,6 +137,31 @@ if(not #success) => {
 
 
 
+#test_desc = "The [beforeEach] code should be called before a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+local(expected) = null
+describe("Something") => {
+    beforeEach => {
+        #num_calls++
+    }
+    it("does one thing") => {
+        #expected = #num_calls
+    }
+}
+if(1 != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(1 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
 #test_desc = "The [beforeEach] code should be called before each test in a test group"
 lspec_setupForTesting
 local(num_calls) = 0
@@ -206,6 +231,31 @@ describe("Something") => {
     }
 }
 if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [afterEach] code should be called after a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+local(expected) = null
+describe("Something") => {
+    afterEach => {
+        #num_calls++
+    }
+    it("does one thing") => {
+        #expected = #num_calls
+    }
+}
+if(0 != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(1 != #num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
