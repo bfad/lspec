@@ -153,3 +153,79 @@ if(3 != #num_calls) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "It should throw an error if an [afterEach] method isn't inside a [describe] method"
+lspec_setupForTesting
+try => {
+    local(success) = false
+    handle(error_code == error_code_lspecNotInTestGroup &&
+           error_msg  == error_msg_lspecNotInTestGroup) => 
+    {
+        failure_clear
+        error_reset
+        #success = true
+    }
+    
+    afterEach => {}
+    if(not #success) => {
+        stdoutnl('Test Failed\n' + #test_desc)
+        stdoutnl(currentCapture->callStack->split('\n')->first)
+        abort
+    }
+}
+
+#success = false
+describe("Something") => {
+    afterEach => {}
+    #success = true
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "It should throw an error if try to add a second [afterEach] method"
+lspec_setupForTesting
+local(success) = false
+describe("Something") => {
+    afterEach => {}
+    try => {
+        handle(error_code == error_code_lspecTestGroupHasAfterEach &&
+               error_msg  == error_msg_lspecTestGroupHasAfterEach) => 
+        {
+            failure_clear
+            error_reset
+            #success = true
+        }
+        afterEach => {}
+    }
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [afterEach] code should be called after each test in a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+describe("Something") => {
+    afterEach => {
+        #num_calls++
+    }
+    it("does one thing") => {}
+    it("does two thing") => {}
+    it("does six thing") => {}
+}
+if(3 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

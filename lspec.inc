@@ -41,6 +41,9 @@ define error_msg_lspecInvalidResultFormat  => "You have specified an invalid res
 define error_code_lspecTestGroupHasBeforeEach => 105
 define error_msg_lspecTestGroupHasBeforeEach  => "You have already specified a [beforeEach] block"
 
+define error_code_lspecTestGroupHasAfterEach => 106
+define error_msg_lspecTestGroupHasAfterEach  => "You have already specified an [afterEach] block"
+
 
 define lspec_testSuite => type {
     // Tallying up the test suite
@@ -149,6 +152,11 @@ define lspec_testSuite => type {
         fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
         
         .getCurrentTestGroup->beforeEach(#block)
+    }
+    public addAfterEach(block::capture) => {
+        fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
+        
+        .getCurrentTestGroup->afterEach(#block)
     }
     
     
@@ -294,6 +302,7 @@ define lspec_testGroup => type {
          private tests  = array,
          private groups = array,
          private beforeEach::capture,
+         private afterEach::capture,
          private currentTest  = 0,
          private currentGroup = 0
      // Getters
@@ -301,6 +310,7 @@ define lspec_testGroup => type {
             tests        => .'tests',
             groups       => .'groups',
             beforeEach   => .'beforeEach',
+            afterEach    => .'afterEach',
             currentTest  => .'currentTest',
             currentGroup => .'currentGroup'
     
@@ -318,6 +328,13 @@ define lspec_testGroup => type {
         .beforeEach = #block
     }
     
+    public afterEach(block::capture) => {
+        fail_if(.afterEach,
+            error_code_lspecTestGroupHasAfterEach, error_msg_lspecTestGroupHasAfterEach
+        )
+        .afterEach = #block
+    }
+    
     public run => {
         local(start) = micros
         lspec->enterTestGroup
@@ -331,8 +348,10 @@ define lspec_testGroup => type {
         .currentTest = 0
         .tests->forEach => {
             .currentTest++
+            
             .beforeEach->invoke
             #1->run
+            .afterEach->invoke
         }
         .currentGroup = 0
         .groups->forEach => {
@@ -434,10 +453,13 @@ define it(label) => {
 
 
 /*
-* The [beforeEach] method adds
+* Before and after hooks
 */
 define beforeEach => {
     lspec->addBeforeEach(givenBlock)
+}
+define afterEach => {
+    lspec->addAfterEach(givenBlock)
 }
 
 
