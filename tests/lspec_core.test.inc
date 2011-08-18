@@ -18,16 +18,16 @@ try => {
     }
 }
 
-    #success = false
-    describe("Something") => {
-        it("does something") => {}
-        #success = true
-    }
-    if(not #success) => {
-        stdoutnl('Test Failed\n' + #test_desc)
-        stdoutnl(currentCapture->callStack->split('\n')->first)
-        abort
-    }
+#success = false
+describe("Something") => {
+    it("does something") => {}
+    #success = true
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
     
 
 

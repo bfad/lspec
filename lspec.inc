@@ -38,6 +38,9 @@ define error_msg_lspecStopInTestGroup  => "Can not stop while in a test group"
 define error_code_lspecInvalidResultFormat => 104
 define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
 
+define error_code_lspecTestGroupHasBeforeEach => 105
+define error_msg_lspecTestGroupHasBeforeEach  => "You have already specified a [beforeEach] block"
+
 
 define lspec_testSuite => type {
     // Tallying up the test suite
@@ -141,6 +144,11 @@ define lspec_testSuite => type {
     public addTestCase => {
         fail_if(not .inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
         .numTestCases++
+    }
+    public addBeforeEach(block::capture) => {
+        fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
+        
+        .getCurrentTestGroup->beforeEach(#block)
     }
     
     
@@ -285,12 +293,14 @@ define lspec_testGroup => type {
          private block::capture,
          private tests  = array,
          private groups = array,
+         private beforeEach::capture,
          private currentTest  = 0,
          private currentGroup = 0
      // Getters
      public label        => .'label',
             tests        => .'tests',
             groups       => .'groups',
+            beforeEach   => .'beforeEach',
             currentTest  => .'currentTest',
             currentGroup => .'currentGroup'
     
@@ -300,6 +310,13 @@ define lspec_testGroup => type {
     }
     
     public numTests => .tests->size
+    
+    public beforeEach(block::capture) => {
+        fail_if(.beforeEach,
+            error_code_lspecTestGroupHasBeforeEach, error_msg_lspecTestGroupHasBeforeEach
+        )
+        .beforeEach = #block
+    }
     
     public run => {
         local(start) = micros
@@ -314,6 +331,7 @@ define lspec_testGroup => type {
         .currentTest = 0
         .tests->forEach => {
             .currentTest++
+            .beforeEach->invoke
             #1->run
         }
         .currentGroup = 0
@@ -412,6 +430,14 @@ define context(label) =>  {
 */
 define it(label) => {
     lspec->addTest(lspec_test(#label, givenBlock))
+}
+
+
+/*
+* The [beforeEach] method adds
+*/
+define beforeEach => {
+    lspec->addBeforeEach(givenBlock)
 }
 
 
