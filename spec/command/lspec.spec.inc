@@ -13,10 +13,9 @@ define call_lspec(args::staticarray=(:)) => {
 
 describe('rspec command') => {
     context('given a file path with no test groups') => {
-        it('executes the file and displays the "no test" summary') => {
-            local(expected)   = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n0 tests, 0 failures\n'
-            local(test_file)  = file('/tmp/lspec.test')
-            
+        local(test_file) = file('/tmp/lspec.test')
+        
+        it('executes the file') => {
             #test_file->doWithClose => {
                 #test_file->openTruncate
                 #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
@@ -24,7 +23,19 @@ describe('rspec command') => {
             
             local(stdout, stderr) = call_lspec((:#test_file->path))
             
+            expect->null(#stderr)
             expect('', #test_file->readString)
+        }
+        
+        it('displays the "no test" summary') => {
+            local(expected) = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n0 tests, 0 failures\n'
+            
+            #test_file->doWithClose => {
+                #test_file->openTruncate
+            }
+            
+            local(stdout, stderr) = call_lspec((:#test_file->path))
+            
             expect->null(#stderr)
             expect(#expected, #stdout)
         }
