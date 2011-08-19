@@ -358,8 +358,10 @@ if(#didRead != lspec->result) => {
 #test_desc = "[lspec->runTime] is properly incremented for a test group"
 lspec_setupForTesting
 describe("Something") => {
-    it("does something") => {
-        sleep(2000)
+    context("nested test group") => {
+        it("does something") => {
+            sleep(2000)
+        }
     }
 }
 if(2 != (lspec->runTime / 1000000)) => {
@@ -524,7 +526,7 @@ local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '   Failure/Error: expect(false)
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
 ' + lspec->indentor + '   ' + lspec->indentor + '     got: false
-' + lspec->indentor + '   # 519:9 ' + currentCapture->callsite_file
+' + lspec->indentor + '   # 521:9 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -549,7 +551,7 @@ describe("Something") => {
     }
 }
 local(expected) = '\n\nFailures:'
-local(start_line) = 540
+local(start_line) = 542
 loop(3) => {
     #expected += '\n
 ' + lspec->indentor + loop_count + ') Something does something ' + loop_count + '
@@ -579,7 +581,7 @@ local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '   Failure/Error: Unexpcted Error!
 ' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
 ' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
-' + lspec->indentor + '   # 572:5 ' + currentCapture->callsite_file
+' + lspec->indentor + '   # 574:5 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -601,7 +603,7 @@ local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '   Failure/Error: expect(false)
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: true
 ' + lspec->indentor + '   ' + lspec->indentor + '     got: false
-' + lspec->indentor + '   # 595:13 ' + currentCapture->callsite_file
+' + lspec->indentor + '   # 597:13 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -631,7 +633,7 @@ describe("Something") => {
 }
 local(expected) = '\n\nPending:\n
 ' + lspec->indentor + '1) Something does something
-' + lspec->indentor + '   ' + lspec->indentor + '# 630:5 ' + currentCapture->callsite_file
+' + lspec->indentor + '   ' + lspec->indentor + '# 632:5 ' + currentCapture->callsite_file
 if(lspec->pendings != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -650,7 +652,7 @@ describe("Something") => {
     it("does something 3") => {}
 }
 local(expected) = '\n\nPending:'
-local(start_line) = 646
+local(start_line) = 648
 loop(3) => {
     #expected += '\n
 ' + lspec->indentor + loop_count + ') Something does something ' + loop_count + '

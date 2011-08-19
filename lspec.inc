@@ -303,6 +303,7 @@ define lspec_testGroup => type {
          private groups = array,
          private beforeEach::capture,
          private afterEach::capture,
+         private parentGroup  = null,
          private currentTest  = 0,
          private currentGroup = 0
      // Getters
@@ -340,7 +341,7 @@ define lspec_testGroup => type {
         lspec->enterTestGroup
         handle => { 
             lspec->leaveTestGroup
-            lspec->runTime(micros - #start)
+            not .parentGroup? lspec->runTime(micros - #start)
         }
         
         lspec->output(self)
@@ -357,6 +358,7 @@ define lspec_testGroup => type {
         .groups->forEach => {
             .currentGroup++
             lspec->incGroupDepth
+            #1->parentGroup = self
             #1->run 
             lspec->decGroupDepth
         }
