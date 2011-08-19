@@ -1,6 +1,8 @@
 #!/usr/local/bin/lasso9
 
-local(f) = file($argv->get(2))
-sourcefile(#f->readString, #f->path, true, false)->invoke
+with i in 2 to $argv->size by 1 do {
+    local(f) = file($argv->get(#i))
+    sourcefile(#f->readString, #f->path, true, false)->invoke
+}
 
 lspec->stop
