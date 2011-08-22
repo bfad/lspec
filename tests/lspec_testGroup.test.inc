@@ -181,6 +181,36 @@ if(3 != #num_calls) => {
 
 
 
+#test_desc = "Tests inside nested test groups call each [beforeEach] in outside-in order"
+lspec_setupForTesting
+local(result) = array
+describe("Something") => {
+    beforeEach => {
+        #result->insert(1)
+    }
+    it("does something") => {}
+    describe("as something") => {
+        beforeEach => {
+            #result->insert(2)
+        }
+        it("does something") => {}
+        describe("in this context") => {
+            beforeEach => {
+                #result->insert(3)
+            }
+            it("does something") => {}
+        }
+    }
+}
+local(expected) = array(1,1,2,1,2,3)
+if(#expected != #result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
 #test_desc = "It should throw an error if an [afterEach] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {

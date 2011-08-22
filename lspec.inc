@@ -181,6 +181,14 @@ define lspec_testSuite => type {
     public getCurrentTest => {
         return .getCurrentTestGroup->tests->get(.getCurrentTestGroup->currentTest)
     }
+    public runCurrentBeforeEach => {
+        local(test_group) = .suite->last
+        loop(.currentDepth) => {
+            #test_group->beforeEach->invoke
+            #test_group = #test_group->groups->get(#test_group->currentGroup)
+        }
+        #test_group->beforeEach->invoke
+    }
     
     
     // Completed test status code
@@ -350,7 +358,7 @@ define lspec_testGroup => type {
         .tests->forEach => {
             .currentTest++
             
-            .beforeEach->invoke
+            lspec->runCurrentBeforeEach
             #1->run
             .afterEach->invoke
         }
