@@ -129,8 +129,6 @@ define lspec_testSuite => type {
     // Code to add test stuff to lspec test suite
     public addTestGroup(tg::lspec_testGroup) => {
         fail_if(.inTest, error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
-
-        lspec->isStopped? lspec_clearSuite
         
         if(.inTestGroup) => {
             .getCurrentTestGroup->groups->insert(#tg)
@@ -307,6 +305,7 @@ define lspec_clearSuite => {
 define lspec_testGroup => type {
     data private label::string,
          private block::capture,
+         private suite::lspec_testSuite,
          private tests  = array,
          private groups = array,
          private beforeEach::capture,
@@ -316,6 +315,7 @@ define lspec_testGroup => type {
          private currentGroup = 0
      // Getters
      public label        => .'label',
+            parentSuite  => .'suite',
             tests        => .'tests',
             groups       => .'groups',
             beforeEach   => .'beforeEach',
@@ -323,9 +323,10 @@ define lspec_testGroup => type {
             currentTest  => .'currentTest',
             currentGroup => .'currentGroup'
     
-    public onCreate(label, gb::capture) => {
+    public onCreate(label, gb::capture, ts::lspec_testSuite=lspec) => {
         .label = #label->asString
         .block = #gb
+        .suite = #ts
     }
     
     public numTests => .tests->size
@@ -351,29 +352,29 @@ define lspec_testGroup => type {
     
     public run => {
         local(start) = micros
-        lspec->enterTestGroup
+        .parentSuite->enterTestGroup
         handle => { 
-            lspec->leaveTestGroup
-            not .parentGroup? lspec->runTime(micros - #start)
+            .parentSuite->leaveTestGroup
+            not .parentGroup? .parentSuite->runTime(micros - #start)
         }
         
-        lspec->output(self)
+        .parentSuite->output(self)
         .block->invoke
         .currentTest = 0
         .tests->forEach => {
             .currentTest++
             
-            lspec->runCurrentBeforeEach
+            .parentSuite->runCurrentBeforeEach
             #1->run
             .runAfterEaches
         }
         .currentGroup = 0
         .groups->forEach => {
             .currentGroup++
-            lspec->incGroupDepth
+            .parentSuite->incGroupDepth
             #1->parentGroup = self
             #1->run 
-            lspec->decGroupDepth
+            .parentSuite->decGroupDepth
         }
     }
 }
@@ -384,11 +385,13 @@ define lspec_testGroup => type {
 define lspec_test => type {
     data private label::string,
          private block::capture,
+         private suite::lspec_testSuite,
          private status::string,
          private location::pair,
          private failedTestCase::expect
     // Getters
     public label          => .'label',
+           parentSuite    => .'suite',
            status         => .'status',
            location       => .'location',
            failedTestCase => .'failedTestCase'
@@ -398,9 +401,10 @@ define lspec_test => type {
         .failedTestCase = #test_case
     }
     
-    public onCreate(label, gb::capture) => {
+    public onCreate(label, gb::capture, ts::lspec_testSuite=lspec) => {
         .label = #label->asString
         .block = #gb
+        .suite = #ts
         
         // We need to know where the test came from in case of errors
         // (Trying to get the error_stack in the handle method doesn't give us what we need)
@@ -415,13 +419,13 @@ define lspec_test => type {
     }
     
     public run => {
-        local(cur_failures) = lspec->numFailures
-        local(cur_cases)    = lspec->numTestCases
+        local(cur_failures) = .parentSuite->numFailures
+        local(cur_cases)    = .parentSuite->numTestCases
 
-        lspec->output(self)
+        .parentSuite->output(self)
 
-        lspec->enterTest
-        handle => { lspec->leaveTest }
+        .parentSuite->enterTest
+        handle => { .parentSuite->leaveTest }
         local(gb_error) = pair(0='No error')
         protect => {
             handle_error => { #gb_error = pair(error_code=error_msg) }
@@ -432,18 +436,18 @@ define lspec_test => type {
             failure_clear
             error_reset
             .status = 'fail'
-            lspec->testFailed(self, #gb_error)
-        else(lspec->numTestCases == #cur_cases)
+            .parentSuite->testFailed(self, #gb_error)
+        else(.parentSuite->numTestCases == #cur_cases)
             .status = 'pending'
-            lspec->testPending(self)
+            .parentSuite->testPending(self)
         else(not .status)
             .status = 'success'
-            lspec->testSucceeded
+            .parentSuite->testSucceeded
         else
-            lspec->testFailed(self)
+            .parentSuite->testFailed(self)
         }
         
-        lspec->outputStatus(.status)
+        .parentSuite->outputStatus(.status)
     }
 }
 
@@ -452,9 +456,11 @@ define lspec_test => type {
 * Wrapper for getting a test group into the test suite
 */
 define describe(label) => {
+    lspec->isStopped? lspec_clearSuite
     lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
 }
 define context(label) =>  {
+    lspec->isStopped? lspec_clearSuite
     lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
 }
 
@@ -484,16 +490,19 @@ define afterEach => {
 * The onCreate that takes a boolean is the simplest test case - asserting true
 */
 define expect => type {
-    data private location,
+    data private suite::lspec_testSuite,
+         private location,
          private val_expected,
          private val_actual
     // Want getters but not setters
-    public location     => .'location'
-    public val_expected => .'val_expected'
-    public val_actual   => .'val_actual'
+    public parentSuite  => .'suite',
+           location     => .'location',
+           val_expected => .'val_expected',
+           val_actual   => .'val_actual'
     
-    public onCreate => {
-        lspec->addTestCase
+    public onCreate(ts::lspec_testSuite=lspec) => {
+        .suite = #ts
+        .parentSuite->addTestCase
         
         // We need to know where the expect came from
         iterate(currentCapture->callStack->split('\n')) => {
@@ -516,7 +525,7 @@ define expect => type {
     private fail(expected::string='', got::string='') => {
         .val_expected = #expected
         .val_actual   = #got
-        lspec->getCurrentTest->failed(self)
+        .parentSuite->getCurrentTest->failed(self)
     }
 }
 
