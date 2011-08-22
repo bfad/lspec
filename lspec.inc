@@ -344,6 +344,11 @@ define lspec_testGroup => type {
         .afterEach = #block
     }
     
+    public runAfterEaches => {
+        .afterEach->invoke
+        .parentGroup? .parentGroup->runAfterEaches
+    }
+    
     public run => {
         local(start) = micros
         lspec->enterTestGroup
@@ -360,7 +365,7 @@ define lspec_testGroup => type {
             
             lspec->runCurrentBeforeEach
             #1->run
-            .afterEach->invoke
+            .runAfterEaches
         }
         .currentGroup = 0
         .groups->forEach => {

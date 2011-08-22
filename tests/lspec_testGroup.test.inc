@@ -309,3 +309,33 @@ if(3 != #num_calls) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "Tests inside nested test groups call each [afterEach] in inside-out order"
+lspec_setupForTesting
+local(result) = array
+describe("Something") => {
+    afterEach => {
+        #result->insert(1)
+    }
+    it("does something") => {}
+    describe("as something") => {
+        afterEach => {
+            #result->insert(2)
+        }
+        it("does something") => {}
+        describe("in this context") => {
+            afterEach => {
+                #result->insert(3)
+            }
+            it("does something") => {}
+        }
+    }
+}
+local(expected) = array(1,2,1,3,2,1)
+if(#expected != #result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
