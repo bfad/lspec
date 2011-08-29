@@ -339,3 +339,265 @@ if(#expected != #result) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "It should throw an error if a [beforeAll] method isn't inside a [describe] method"
+lspec_setupForTesting
+try => {
+    local(success) = false
+    handle(error_code == error_code_lspecNotInTestGroup &&
+           error_msg  == error_msg_lspecNotInTestGroup) => 
+    {
+        failure_clear
+        error_reset
+        #success = true
+    }
+    
+    beforeAll => {}
+    if(not #success) => {
+        stdoutnl('Test Failed\n' + #test_desc)
+        stdoutnl(currentCapture->callStack->split('\n')->first)
+        abort
+    }
+}
+
+#success = false
+describe("Something") => {
+    beforeAll => {}
+    #success = true
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "It should throw an error if try to add a second [beforeAll] method"
+lspec_setupForTesting
+local(success) = false
+describe("Something") => {
+    beforeAll => {}
+    try => {
+        handle(error_code == error_code_lspecTestGroupHasBeforeAll &&
+               error_msg  == error_msg_lspecTestGroupHasBeforeAll) => 
+        {
+            failure_clear
+            error_reset
+            #success = true
+        }
+        beforeAll => {}
+    }
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [beforeAll] code should be called before a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+local(expected) = null
+describe("Something") => {
+    beforeAll => {
+        #num_calls++
+    }
+    it("does one thing") => {
+        #expected = #num_calls
+    }
+}
+if(1 != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(1 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [beforeAll] code should be called once before all the tests in a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+describe("Something") => {
+    beforeAll => {
+        #num_calls++
+    }
+    it("does one thing") => {}
+    it("does two thing") => {}
+    it("does six thing") => {}
+}
+if(1 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [beforeAll] is only called once before any nested test groups or tests"
+lspec_setupForTesting
+local(result) = array
+describe("Something") => {
+    beforeAll => {
+        #result->insert(1)
+    }
+    it("does something") => {}
+    describe("as something") => {
+        beforeAll => {
+            #result->insert(2)
+        }
+        it("does something") => {}
+        describe("in this context") => {
+            beforeAll => {
+                #result->insert(3)
+            }
+            it("does something") => {}
+        }
+    }
+}
+local(expected) = array(1,2,3)
+if(#expected != #result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "It should throw an error if an [afterAll] method isn't inside a [describe] method"
+lspec_setupForTesting
+try => {
+    local(success) = false
+    handle(error_code == error_code_lspecNotInTestGroup &&
+           error_msg  == error_msg_lspecNotInTestGroup) => 
+    {
+        failure_clear
+        error_reset
+        #success = true
+    }
+    
+    afterAll => {}
+    if(not #success) => {
+        stdoutnl('Test Failed\n' + #test_desc)
+        stdoutnl(currentCapture->callStack->split('\n')->first)
+        abort
+    }
+}
+
+#success = false
+describe("Something") => {
+    afterAll => {}
+    #success = true
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "It should throw an error if try to add a second [afterAll] method"
+lspec_setupForTesting
+local(success) = false
+describe("Something") => {
+    afterAll => {}
+    try => {
+        handle(error_code == error_code_lspecTestGroupHasAfterAll &&
+               error_msg  == error_msg_lspecTestGroupHasAfterAll) => 
+        {
+            failure_clear
+            error_reset
+            #success = true
+        }
+        afterAll => {}
+    }
+}
+if(not #success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [afterAll] code should be called after a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+local(expected) = null
+describe("Something") => {
+    afterAll => {
+        #num_calls++
+    }
+    it("does one thing") => {
+        #expected = #num_calls
+    }
+}
+if(0 != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(1 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "The [afterAll] code should be called after all tests in a test group"
+lspec_setupForTesting
+local(num_calls) = 0
+describe("Something") => {
+    afterAll => {
+        #num_calls++
+    }
+    it("does one thing") => {}
+    it("does two thing") => {}
+    it("does six thing") => {}
+}
+if(1 != #num_calls) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "Each [afterAll] in nested test groups in inside-out order"
+lspec_setupForTesting
+local(result) = array
+describe("Something") => {
+    afterAll => {
+        #result->insert(1)
+    }
+    it("does something") => {}
+    describe("as something") => {
+        afterAll => {
+            #result->insert(2)
+        }
+        it("does something") => {}
+        describe("in this context") => {
+            afterAll => {
+                #result->insert(3)
+            }
+            it("does something") => {}
+        }
+    }
+}
+local(expected) = array(3,2,1)
+if(#expected != #result) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

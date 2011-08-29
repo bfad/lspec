@@ -44,6 +44,12 @@ define error_msg_lspecTestGroupHasBeforeEach  => "You have already specified a [
 define error_code_lspecTestGroupHasAfterEach => 106
 define error_msg_lspecTestGroupHasAfterEach  => "You have already specified an [afterEach] block"
 
+define error_code_lspecTestGroupHasBeforeAll => 107
+define error_msg_lspecTestGroupHasBeforeAll  => "You have already specified a [beforeAll] block"
+
+define error_code_lspecTestGroupHasAfterAll => 108
+define error_msg_lspecTestGroupHasAfterAll  => "You have already specified a [afterAll] block"
+
 
 define lspec_testSuite => type {
     // Tallying up the test suite
@@ -146,10 +152,18 @@ define lspec_testSuite => type {
         fail_if(not .inTest, error_code_lspecNotInTest, error_msg_lspecNotInTest)
         .numTestCases++
     }
+    public addBeforeAll(block::capture) => {
+        fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
+        .getCurrentTestGroup->beforeAll(#block)
+    }
     public addBeforeEach(block::capture) => {
         fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
         
         .getCurrentTestGroup->beforeEach(#block)
+    }
+    public addAfterAll(block::capture) => {
+        fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
+        .getCurrentTestGroup->afterAll(#block)
     }
     public addAfterEach(block::capture) => {
         fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
@@ -308,7 +322,9 @@ define lspec_testGroup => type {
          private suite::lspec_testSuite,
          private tests  = array,
          private groups = array,
+         private beforeAll::capture,
          private beforeEach::capture,
+         private afterAll::capture,
          private afterEach::capture,
          private parentGroup  = null,
          private currentTest  = 0,
@@ -331,11 +347,26 @@ define lspec_testGroup => type {
     
     public numTests => .tests->size
     
+    public beforeAll(block::capture) => {
+        fail_if(.beforeAll,
+            error_code_lspecTestGroupHasBeforeAll, error_msg_lspecTestGroupHasBeforeAll
+        )
+        .beforeAll = #block
+        #block->invoke
+    }
+    
     public beforeEach(block::capture) => {
         fail_if(.beforeEach,
             error_code_lspecTestGroupHasBeforeEach, error_msg_lspecTestGroupHasBeforeEach
         )
         .beforeEach = #block
+    }
+    
+    public afterAll(block::capture) => {
+        fail_if(.afterAll,
+            error_code_lspecTestGroupHasAfterAll, error_msg_lspecTestGroupHasAfterAll
+        )
+        .afterAll = #block
     }
     
     public afterEach(block::capture) => {
@@ -353,7 +384,8 @@ define lspec_testGroup => type {
     public run => {
         local(start) = micros
         .parentSuite->enterTestGroup
-        handle => { 
+        handle => {
+            .afterAll->invoke
             .parentSuite->leaveTestGroup
             not .parentGroup? .parentSuite->runTime(micros - #start)
         }
@@ -476,8 +508,14 @@ define it(label) => {
 /*
 * Before and after hooks
 */
+define beforeAll => {
+    lspec->addBeforeAll(givenBlock)
+}
 define beforeEach => {
     lspec->addBeforeEach(givenBlock)
+}
+define afterAll => {
+    lspec->addAfterAll(givenBlock)
 }
 define afterEach => {
     lspec->addAfterEach(givenBlock)
