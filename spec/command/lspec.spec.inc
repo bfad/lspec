@@ -87,6 +87,45 @@ describe('rspec command') => {
             expect(#expected, #stdout)
         }
     }
+    
+    context('given folder path(s)') => {
+        
+        context('folder contains one file without the test extensions') => {
+            it("doesn't execute the file") => {}
+            it('displays the "no test" summary') => {}
+        }
+        
+        context("folder containes a file with the test extension with no tests") => {
+            it("executes the file") => {}
+            it('displays the "no test" summary') => {}
+        }
+        
+        context("folder containes 3 files with the test extension with no tests") => {
+            it("executes the files") => {}
+            it('displays the "no test" summary') => {}
+        }
+        
+        context("folder contains a sub folder with an empty file that has the test extension") => {
+            it("executes the file") => {}
+            it('displays the "no test" summary') => {}
+        }
+        
+        context("three folders each with a file with the test extension with no tests") => {
+            it("executes the files") => {}
+            it('displays the "no test" summary') => {}
+            
+            context("sub-folders three levels deep in one of the folders that have files with the test extension") => {
+                it("executes the files") => {}
+                it('displays the "no test" summary') => {}
+            }
+        }
+    }
+    
+    context('called with no arguments') => {
+        it("throws an error if a folder named spec doesn't exist") => {}
+        it("executes all the files with the test extension in the spec folder") => {}
+        it("executes all the files with the test extension in any of spec's sub-folders") => {}
+    }
 }
 
 lspec->stop
