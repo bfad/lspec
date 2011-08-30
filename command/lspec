@@ -2,7 +2,8 @@
 
 with i in 2 to $argv->size by 1 do {
     local(f) = file($argv->get(#i))
-    sourcefile(#f->readString, #f->path, true, false)->invoke
+    #f->isDir? 'Nothing right now'
+        | sourcefile(#f->readString, #f->path, true, false)->invoke
 }
 
 lspec->stop
