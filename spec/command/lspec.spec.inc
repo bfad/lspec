@@ -92,7 +92,6 @@ describe('rspec command') => {
         beforeAll => {
             local(test_dir) = dir('/tmp/lspec_test/')
             #test_dir->create
-            #test_dir->setcwd
             dir(#test_dir->path + 'spec/')->create
         }
         afterAll => {
@@ -125,7 +124,21 @@ describe('rspec command') => {
         }
         
         context("folder containes a file with the test extension with no tests") => {
-            it("executes the file") => {}
+            beforeAll => {
+                local(test_file) = file(#test_dir->path + 'spec/foo.spec.inc')
+                #test_file->doWithClose => {
+                    #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
+                }
+            }
+            afterAll => {
+                #test_file->delete
+            }
+            it("executes the file") => {
+                local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
+                
+                expect->null(#stderr)
+                expect('', #test_file->readString)
+            }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
@@ -136,7 +149,33 @@ describe('rspec command') => {
         }
         
         context("folder containes 3 files with the test extension with no tests") => {
-            it("executes the files") => {}
+            beforeAll => {
+                local(test_file1) = file(#test_dir->path + 'spec/foo1.spec.inc')
+                local(test_file2) = file(#test_dir->path + 'spec/foo2.spec.inc')
+                local(test_file3) = file(#test_dir->path + 'spec/foo3.spec.inc')
+                #test_file1->doWithClose => {
+                    #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")
+                }
+                #test_file2->doWithClose => {
+                    #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")
+                }
+                #test_file3->doWithClose => {
+                    #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")
+                }
+            }
+            afterAll => {
+                #test_file1->delete
+                #test_file2->delete
+                #test_file3->delete
+            }
+            it("executes the files") => {
+                local(_, stderr) = call_lspec((:#test_dir->path + 'spec'))
+                
+                expect->null(#stderr)
+                expect('', #test_file1->readString)
+                expect('', #test_file2->readString)
+                expect('', #test_file3->readString)
+            }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
@@ -147,7 +186,23 @@ describe('rspec command') => {
         }
         
         context("folder contains a sub folder with an empty file that has the test extension") => {
-            it("executes the file") => {}
+            beforeAll => {
+                dir(#test_dir->path + 'spec/sub/')->create
+                local(test_file) = file(#test_dir->path + 'spec/sub/foo.spec.inc')
+                #test_file->doWithClose => {
+                    #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
+                }
+            }
+            afterAll => {
+                #test_file->delete
+                dir(#test_dir->path + 'spec/sub/')->delete
+            }
+            it("executes the file") => {
+                local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
+                
+                expect->null(#stderr)
+                expect('', #test_file->readString)
+            }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
@@ -169,6 +224,8 @@ describe('rspec command') => {
     }
     
     context('called with no arguments') => {
+        //#test_dir->setcwd
+        //That can cause errors with lspec library. make sure to save off cwd first and set it back right after the call
         it("throws an error if a folder named spec doesn't exist") => {}
         it("executes all the files with the test extension in the spec folder") => {}
         it("executes all the files with the test extension in any of spec's sub-folders") => {}

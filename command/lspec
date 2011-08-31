@@ -1,9 +1,22 @@
 #!/usr/local/bin/lasso9
 
+
+define lspec_runFolder(d::dir) => {
+    with f in #d->eachFile do => { lspec_runFile(#f) }
+    with f in #d->eachDir  do => { lspec_runFolder(#f) }
+}
+
+define lspec_runFile(f::file) => {
+    if(not #f->path->endsWith('.spec.inc')) => { return }
+    
+    sourcefile(#f->readString, #f->path, true, false)->invoke
+}
+
+
 with i in 2 to $argv->size by 1 do {
     local(f) = file($argv->get(#i))
-    #f->isDir? 'Nothing right now'
-        | sourcefile(#f->readString, #f->path, true, false)->invoke
+    #f->isDir? lspec_runFolder(dir(#f->path)) 
+             | sourcefile(#f->readString, #f->path, true, false)->invoke
 }
 
 lspec->stop
