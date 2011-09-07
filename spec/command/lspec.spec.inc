@@ -97,17 +97,19 @@ describe('rspec command') => {
         afterAll => {
             sys_process('/bin/rm', (:'-rf', #test_dir->path))->wait
         }
+        afterEach => {
+            sys_process('/bin/rm', (:'-rf', #test_dir->path + 'spec/'))->wait
+            dir(#test_dir->path + 'spec/')->create
+        }
         
         context('folder contains one file without the test extensions') => {
-            beforeAll => {
+            beforeEach => {
                 local(test_file) = file(#test_dir->path + 'spec/foo.lasso')
                 #test_file->doWithClose => {
                     #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
                 }
             }
-            afterAll => {
-                #test_file->delete
-            }
+            
             it("doesn't execute the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
 
@@ -124,15 +126,13 @@ describe('rspec command') => {
         }
         
         context("folder containes a file with the test extension with no tests") => {
-            beforeAll => {
+            beforeEach => {
                 local(test_file) = file(#test_dir->path + 'spec/foo.spec.inc')
                 #test_file->doWithClose => {
                     #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
                 }
             }
-            afterAll => {
-                #test_file->delete
-            }
+            
             it("executes the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
@@ -149,7 +149,7 @@ describe('rspec command') => {
         }
         
         context("folder containes 3 files with the test extension with no tests") => {
-            beforeAll => {
+            beforeEach => {
                 local(test_file1) = file(#test_dir->path + 'spec/foo1.spec.inc')
                 local(test_file2) = file(#test_dir->path + 'spec/foo2.spec.inc')
                 local(test_file3) = file(#test_dir->path + 'spec/foo3.spec.inc')
@@ -163,11 +163,7 @@ describe('rspec command') => {
                     #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")
                 }
             }
-            afterAll => {
-                #test_file1->delete
-                #test_file2->delete
-                #test_file3->delete
-            }
+            
             it("executes the files") => {
                 local(_, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
@@ -186,17 +182,14 @@ describe('rspec command') => {
         }
         
         context("folder contains a sub folder with an empty file that has the test extension") => {
-            beforeAll => {
+            beforeEach => {
                 dir(#test_dir->path + 'spec/sub/')->create
                 local(test_file) = file(#test_dir->path + 'spec/sub/foo.spec.inc')
                 #test_file->doWithClose => {
                     #test_file->writeString("file('" + #test_file->path + "')->openTruncate&close")
                 }
             }
-            afterAll => {
-                #test_file->delete
-                dir(#test_dir->path + 'spec/sub/')->delete
-            }
+            
             it("executes the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
@@ -213,12 +206,64 @@ describe('rspec command') => {
         }
         
         context("three folders each with a file with the test extension with no tests") => {
-            it("executes the files") => {}
-            it('displays the "no test" summary') => {}
+            beforeEach => {
+                dir(#test_dir->path + 'spec/sub1/')->create
+                dir(#test_dir->path + 'spec/sub2/')->create
+                dir(#test_dir->path + 'spec/sub3/')->create
+
+                local(test_file1) = file(#test_dir->path + 'spec/sub1/foo1.spec.inc')
+                local(test_file2) = file(#test_dir->path + 'spec/sub2/foo2.spec.inc')
+                local(test_file3) = file(#test_dir->path + 'spec/sub3/foo3.spec.inc')
+                #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+                #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+                #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+            }
+            
+            it("executes the files") => {
+                local(_, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
+                
+                expect->null(#stderr)
+                expect('', #test_file1->readString)
+                expect('', #test_file2->readString)
+                expect('', #test_file3->readString)
+            }
+            it('displays the "no test" summary') => {
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
+                local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
+                
+                expect->null(#stderr)
+                expect(#expected, #stdout)
+            }
             
             context("sub-folders three levels deep in one of the folders that have files with the test extension") => {
-                it("executes the files") => {}
-                it('displays the "no test" summary') => {}
+                beforeEach => {
+                    dir(#test_dir->path + 'spec/sub1/')->create
+                    dir(#test_dir->path + 'spec/sub1/sub2/')->create
+                    dir(#test_dir->path + 'spec/sub1/sub2/sub3/')->create
+
+                    local(test_file1) = file(#test_dir->path + 'spec/sub1/sub2/sub3/foo1.spec.inc')
+                    local(test_file2) = file(#test_dir->path + 'spec/sub1/sub2/sub3/foo2.spec.inc')
+                    local(test_file3) = file(#test_dir->path + 'spec/sub1/sub2/sub3/foo3.spec.inc')
+                    #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+                    #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+                    #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+                }
+                
+                it("executes the files") => {
+                    local(_, stderr) = call_lspec((:#test_dir->path + 'spec'))
+                    
+                    expect->null(#stderr)
+                    expect('', #test_file1->readString)
+                    expect('', #test_file2->readString)
+                    expect('', #test_file3->readString)
+                }
+                it('displays the "no test" summary') => {
+                    local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
+                    local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
+                    
+                    expect->null(#stderr)
+                    expect(#expected, #stdout)
+                }
             }
         }
     }
