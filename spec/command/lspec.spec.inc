@@ -269,11 +269,79 @@ describe('rspec command') => {
     }
     
     context('called with no arguments') => {
-        //#test_dir->setcwd
-        //That can cause errors with lspec library. make sure to save off cwd first and set it back right after the call
-        it("throws an error if a folder named spec doesn't exist") => {}
-        it("executes all the files with the test extension in the spec folder") => {}
-        it("executes all the files with the test extension in any of spec's sub-folders") => {}
+        beforeAll => {
+            local(test_dir) = dir('/tmp/lspec_test/')
+            #test_dir->create
+            dir(#test_dir->path + 'spec/')->create
+        }
+        afterAll => {
+            sys_process('/bin/rm', (:'-rf', #test_dir->path))->wait
+        }
+        afterEach => {
+            sys_process('/bin/rm', (:'-rf', #test_dir->path + 'spec/'))->wait
+            dir(#test_dir->path + 'spec/')->create
+        }
+        
+        it("throws an error if a folder named spec doesn't exist") => {
+            // [dir->setCwd] can cause errors with lspec library, so
+            // make sure to save off cwd first and set it back right after lspec call
+            local(cwd)      = dir(io_file_getcwd)
+            local(expected) = error_code_resNotFound + ':' + error_msg_resNotFound
+            
+            sys_process('/bin/rm', (:'-rf', #test_dir->path + 'spec/'))->wait
+            
+            #test_dir->setcwd
+            handle => { #cwd->setcwd }
+            local(stdout, stderr) = call_lspec
+            #cwd->setcwd
+            
+            expect(#expected, #stderr)
+            expect->null(#stdout)
+        }
+        it("executes all the files with the test extension in the spec folder") => {
+            local(cwd)        = dir(io_file_getcwd)
+            local(expected)   = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
+            local(test_file1) = file(#test_dir->path + 'spec/foo1.spec.inc')
+            local(test_file2) = file(#test_dir->path + 'spec/foo2.spec.inc')
+            local(test_file3) = file(#test_dir->path + 'spec/foo3.expt.inc')
+            #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+            #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+            #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+            
+            #test_dir->setcwd
+            handle => { #cwd->setcwd }
+            local(stdout, stderr) = call_lspec
+            #cwd->setcwd
+            
+            expect->null(#stderr)
+            expect(#expected, #stdout)
+            expect('', #test_file1->readString)
+            expect('', #test_file2->readString)
+            expect("file('" + #test_file3->path + "')->openTruncate&close", #test_file3->readString)
+        }
+        it("executes all the files with the test extension in any of spec's sub-folders") => {
+            dir(#test_dir->path + 'spec/sub1/')->create
+            dir(#test_dir->path + 'spec/sub1/sub2/')->create
+            dir(#test_dir->path + 'spec/sub1/sub2/sub3/')->create
+
+            local(test_file1) = file(#test_dir->path + 'spec/sub1/foo1.spec.inc')
+            local(test_file2) = file(#test_dir->path + 'spec/sub1/sub2/foo2.spec.inc')
+            local(test_file3) = file(#test_dir->path + 'spec/sub1/sub2/sub3/foo3.inc')
+            #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+            #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+            #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+            
+            #test_dir->setcwd
+            handle => { #cwd->setcwd }
+            local(stdout, stderr) = call_lspec
+            #cwd->setcwd
+            
+            expect->null(#stderr)
+            expect(#expected, #stdout)
+            expect('', #test_file1->readString)
+            expect('', #test_file2->readString)
+            expect("file('" + #test_file3->path + "')->openTruncate&close", #test_file3->readString)
+        }
     }
 }
 

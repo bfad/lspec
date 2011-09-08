@@ -12,6 +12,13 @@ define lspec_runFile(f::file) => {
     sourcefile(#f->readString, #f->path, true, false)->invoke
 }
 
+if($argv->size == 1) => {
+    if(not dir('./spec/')->exists) => {
+        file_stderr->writeString(error_code_resNotFound + ':' + error_msg_resNotFound)
+        sys_exit(1)
+    }
+    lspec_runFolder(dir('./spec/'))
+}
 
 with i in 2 to $argv->size by 1 do {
     local(f) = file($argv->get(#i))
