@@ -341,7 +341,7 @@ define lspec_testGroup => type {
     
     public onCreate(label, gb::capture, ts::lspec_testSuite=lspec) => {
         .label = #label->asString
-        .block = #gb
+        .block = #gb->asCopyDeep
         .suite = #ts
     }
     
@@ -435,7 +435,7 @@ define lspec_test => type {
     
     public onCreate(label, gb::capture, ts::lspec_testSuite=lspec) => {
         .label = #label->asString
-        .block = #gb
+        .block = #gb->asCopyDeep
         .suite = #ts
         
         // We need to know where the test came from in case of errors

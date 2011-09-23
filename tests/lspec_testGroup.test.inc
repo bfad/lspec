@@ -14,24 +14,24 @@ if(lspec->suite->first->numTests != 2) => {
 
 #test_desc = "[describe] sub-test groups properly handled at the end of tests & outputed correctly"
 lspec_setupForTesting
-local(flag1, flag2) = (:false, false)
+var(flag1 = false, flag2 = false)
 describe("Something") => {
     it("Does something") => {}
     describe("As an aspect") => {
-        #flag1 = true
+        $flag1 = true
         describe("Sub-aspect") => {
-            #flag2 = true
+            $flag2 = true
         }
         it("Does something cool") => {
-            #flag2 = false
+            $flag2 = false
         }
     }
     it("Does something else") => {
-        #flag1 = false
-        #flag2 = false
+        $flag1 = false
+        $flag2 = false
     }
 }
-if(not #flag1 or not #flag2) => {
+if(not $flag1 or not $flag2) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -55,24 +55,24 @@ if(lspec->suite->first->numTests != 2) => {
 
 #test_desc = "[context] sub-test groups properly handled at the end of tests & outputed correctly"
 lspec_setupForTesting
-local(flag1, flag2) = (:false, false)
+var(flag1 = false, flag2 = false)
 context("Something") => {
     it("Does something") => {}
     context("As an aspect") => {
-        #flag1 = true
+        $flag1 = true
         context("Sub-aspect") => {
-            #flag2 = true
+            $flag2 = true
         }
         it("Does something cool") => {
-            #flag2 = false
+            $flag2 = false
         }
     }
     it("Does something else") => {
-        #flag1 = false
-        #flag2 = false
+        $flag1 = false
+        $flag2 = false
     }
 }
-if(not #flag1 or not #flag2) => {
+if(not $flag1 or not $flag2) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -83,29 +83,29 @@ if(not #flag1 or not #flag2) => {
 #test_desc = "It should throw an error if an [beforeEach] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
            error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     beforeEach => {}
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     beforeEach => {}
-    #success = true
+    $success = true
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -115,7 +115,7 @@ if(not #success) => {
 
 #test_desc = "It should throw an error if try to add a second [beforeEach] method"
 lspec_setupForTesting
-local(success) = false
+var(success) = false
 describe("Something") => {
     beforeEach => {}
     try => {
@@ -124,12 +124,12 @@ describe("Something") => {
         {
             failure_clear
             error_reset
-            #success = true
+            $success = true
         }
         beforeEach => {}
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -139,22 +139,22 @@ if(not #success) => {
 
 #test_desc = "The [beforeEach] code should be called before a test group"
 lspec_setupForTesting
-local(num_calls) = 0
-local(expected) = null
+var(num_calls) = 0
+var(expected) = null
 describe("Something") => {
     beforeEach => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {
-        #expected = #num_calls
+        $expected = $num_calls
     }
 }
-if(1 != #expected) => {
+if(1 != $expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -164,16 +164,16 @@ if(1 != #num_calls) => {
 
 #test_desc = "The [beforeEach] code should be called before each test in a test group"
 lspec_setupForTesting
-local(num_calls) = 0
+var(num_calls) = 0
 describe("Something") => {
     beforeEach => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {}
     it("does two thing") => {}
     it("does six thing") => {}
 }
-if(3 != #num_calls) => {
+if(3 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -183,27 +183,27 @@ if(3 != #num_calls) => {
 
 #test_desc = "Tests inside nested test groups call each [beforeEach] in outside-in order"
 lspec_setupForTesting
-local(result) = array
+var(result) = array
 describe("Something") => {
     beforeEach => {
-        #result->insert(1)
+        $result->insert(1)
     }
     it("does something") => {}
     describe("as something") => {
         beforeEach => {
-            #result->insert(2)
+            $result->insert(2)
         }
         it("does something") => {}
         describe("in this context") => {
             beforeEach => {
-                #result->insert(3)
+                $result->insert(3)
             }
             it("does something") => {}
         }
     }
 }
 local(expected) = array(1,1,2,1,2,3)
-if(#expected != #result) => {
+if(#expected != $result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -214,29 +214,29 @@ if(#expected != #result) => {
 #test_desc = "It should throw an error if an [afterEach] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
            error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     afterEach => {}
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     afterEach => {}
-    #success = true
+    $success = true
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -246,7 +246,7 @@ if(not #success) => {
 
 #test_desc = "It should throw an error if try to add a second [afterEach] method"
 lspec_setupForTesting
-local(success) = false
+var(success) = false
 describe("Something") => {
     afterEach => {}
     try => {
@@ -255,12 +255,12 @@ describe("Something") => {
         {
             failure_clear
             error_reset
-            #success = true
+            $success = true
         }
         afterEach => {}
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -270,22 +270,22 @@ if(not #success) => {
 
 #test_desc = "The [afterEach] code should be called after a test group"
 lspec_setupForTesting
-local(num_calls) = 0
-local(expected) = null
+var(num_calls) = 0
+var(expected) = null
 describe("Something") => {
     afterEach => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {
-        #expected = #num_calls
+        $expected = $num_calls
     }
 }
-if(0 != #expected) => {
+if(0 != $expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -295,16 +295,16 @@ if(1 != #num_calls) => {
 
 #test_desc = "The [afterEach] code should be called after each test in a test group"
 lspec_setupForTesting
-local(num_calls) = 0
+var(num_calls) = 0
 describe("Something") => {
     afterEach => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {}
     it("does two thing") => {}
     it("does six thing") => {}
 }
-if(3 != #num_calls) => {
+if(3 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -314,27 +314,27 @@ if(3 != #num_calls) => {
 
 #test_desc = "Tests inside nested test groups call each [afterEach] in inside-out order"
 lspec_setupForTesting
-local(result) = array
+var(result) = array
 describe("Something") => {
     afterEach => {
-        #result->insert(1)
+        $result->insert(1)
     }
     it("does something") => {}
     describe("as something") => {
         afterEach => {
-            #result->insert(2)
+            $result->insert(2)
         }
         it("does something") => {}
         describe("in this context") => {
             afterEach => {
-                #result->insert(3)
+                $result->insert(3)
             }
             it("does something") => {}
         }
     }
 }
 local(expected) = array(1,2,1,3,2,1)
-if(#expected != #result) => {
+if(#expected != $result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -345,29 +345,29 @@ if(#expected != #result) => {
 #test_desc = "It should throw an error if a [beforeAll] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
            error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     beforeAll => {}
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     beforeAll => {}
-    #success = true
+    $success = true
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -377,7 +377,7 @@ if(not #success) => {
 
 #test_desc = "It should throw an error if try to add a second [beforeAll] method"
 lspec_setupForTesting
-local(success) = false
+var(success) = false
 describe("Something") => {
     beforeAll => {}
     try => {
@@ -386,12 +386,12 @@ describe("Something") => {
         {
             failure_clear
             error_reset
-            #success = true
+            $success = true
         }
         beforeAll => {}
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -401,22 +401,22 @@ if(not #success) => {
 
 #test_desc = "The [beforeAll] code should be called before a test group"
 lspec_setupForTesting
-local(num_calls) = 0
-local(expected) = null
+var(num_calls) = 0
+var(expected) = null
 describe("Something") => {
     beforeAll => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {
-        #expected = #num_calls
+        $expected = $num_calls
     }
 }
-if(1 != #expected) => {
+if(1 != $expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -426,16 +426,16 @@ if(1 != #num_calls) => {
 
 #test_desc = "The [beforeAll] code should be called once before all the tests in a test group"
 lspec_setupForTesting
-local(num_calls) = 0
+var(num_calls) = 0
 describe("Something") => {
     beforeAll => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {}
     it("does two thing") => {}
     it("does six thing") => {}
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -445,27 +445,27 @@ if(1 != #num_calls) => {
 
 #test_desc = "The [beforeAll] is only called once before any nested test groups or tests"
 lspec_setupForTesting
-local(result) = array
+var(result) = array
 describe("Something") => {
     beforeAll => {
-        #result->insert(1)
+        $result->insert(1)
     }
     it("does something") => {}
     describe("as something") => {
         beforeAll => {
-            #result->insert(2)
+            $result->insert(2)
         }
         it("does something") => {}
         describe("in this context") => {
             beforeAll => {
-                #result->insert(3)
+                $result->insert(3)
             }
             it("does something") => {}
         }
     }
 }
 local(expected) = array(1,2,3)
-if(#expected != #result) => {
+if(#expected != $result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -476,29 +476,29 @@ if(#expected != #result) => {
 #test_desc = "It should throw an error if an [afterAll] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
            error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     afterAll => {}
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     afterAll => {}
-    #success = true
+    $success = true
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -508,7 +508,7 @@ if(not #success) => {
 
 #test_desc = "It should throw an error if try to add a second [afterAll] method"
 lspec_setupForTesting
-local(success) = false
+var(success) = false
 describe("Something") => {
     afterAll => {}
     try => {
@@ -517,12 +517,12 @@ describe("Something") => {
         {
             failure_clear
             error_reset
-            #success = true
+            $success = true
         }
         afterAll => {}
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -532,22 +532,22 @@ if(not #success) => {
 
 #test_desc = "The [afterAll] code should be called after a test group"
 lspec_setupForTesting
-local(num_calls) = 0
-local(expected) = null
+var(num_calls) = 0
+var(expected) = null
 describe("Something") => {
     afterAll => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {
-        #expected = #num_calls
+        $expected = $num_calls
     }
 }
-if(0 != #expected) => {
+if(0 != $expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -557,16 +557,16 @@ if(1 != #num_calls) => {
 
 #test_desc = "The [afterAll] code should be called after all tests in a test group"
 lspec_setupForTesting
-local(num_calls) = 0
+var(num_calls) = 0
 describe("Something") => {
     afterAll => {
-        #num_calls++
+        $num_calls++
     }
     it("does one thing") => {}
     it("does two thing") => {}
     it("does six thing") => {}
 }
-if(1 != #num_calls) => {
+if(1 != $num_calls) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -576,27 +576,27 @@ if(1 != #num_calls) => {
 
 #test_desc = "Each [afterAll] in nested test groups in inside-out order"
 lspec_setupForTesting
-local(result) = array
+var(result) = array
 describe("Something") => {
     afterAll => {
-        #result->insert(1)
+        $result->insert(1)
     }
     it("does something") => {}
     describe("as something") => {
         afterAll => {
-            #result->insert(2)
+            $result->insert(2)
         }
         it("does something") => {}
         describe("in this context") => {
             afterAll => {
-                #result->insert(3)
+                $result->insert(3)
             }
             it("does something") => {}
         }
     }
 }
 local(expected) = array(3,2,1)
-if(#expected != #result) => {
+if(#expected != $result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

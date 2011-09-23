@@ -4,15 +4,15 @@ lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_missingGivenBlock &&
                    error_msg  == error_msg_missingGivenBlock) => 
-            { #success = true }
+            { $success = true }
             expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -77,17 +77,17 @@ lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         try => {
-            local(success) = true
+            var(success) = true
             handle(error_code == error_code_divideByZero &&
                    error_msg  == error_msg_divideByZero) => 
-            { #success = false }
+            { $success = false }
             expect->error(error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup) => {
                 5/0
             }
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -172,15 +172,15 @@ lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_missingGivenBlock &&
                    error_msg  == error_msg_missingGivenBlock) => 
-            { #success = true }
+            { $success = true }
             expect->error
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -287,15 +287,15 @@ lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_missingGivenBlock &&
                    error_msg  == error_msg_missingGivenBlock) => 
-            { #success = true }
+            { $success = true }
             expect->stdout('Lager, sir, is regal.')
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -347,10 +347,10 @@ describe("Something") => {
         }
         
         // read test data
-        local(didRead = #readTest->readString)
+        var(didRead = #readTest->readString)
     }
 }
-if(#didRead != '') => {
+if($didRead != '') => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -383,17 +383,17 @@ lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_divideByZero &&
                    error_msg  == error_msg_divideByZero) => 
-            { #success = true }
+            { $success = true }
             expect->stdout('Lager, sir, is regal.') => {
                 5/0
             }
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort

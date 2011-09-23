@@ -1,29 +1,29 @@
 local(test_desc) = "It should throw an error if an [it] method isn't inside a [describe] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTestGroup &&
            error_msg  == error_msg_lspecNotInTestGroup) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     it("does something") => {}
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     it("does something") => {}
-    #success = true
+    $success = true
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -36,15 +36,15 @@ lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_lspecTestGroupInTest &&
                    error_msg  == error_msg_lspecTestGroupInTest) => 
-            { #success = true }
+            { $success = true }
             describe("Should Fail") => {}
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -59,19 +59,19 @@ if(lspec->numFailures != 1) => {
         
 #test_desc = "An [it] method should only have it's givenBlock called by a [describe] method"
 lspec_setupForTesting
-#success = false
+$success = false
 local(gets_to_it) = false
 describe("Something") => {
     it("does something") => {
-        #success = true
+        $success = true
     }
-    if(#success) => {
+    if($success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -149,31 +149,31 @@ if(lspec->numPending != 1) => {
 #test_desc = "It should throw an error if an [expect] method isn't inside an [it] method"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecNotInTest &&
            error_msg  == error_msg_lspecNotInTest) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     expect(true)
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
     }
 }
 
-#success = false
+$success = false
 describe("Something") => {
     it("does something") => {
         expect(true)
-        #success = true
+        $success = true
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -277,17 +277,17 @@ if(lspec->numSuccesses != 0) => {
 #test_desc = "Tests for valid resultsFormat options"
 lspec_setupForTesting
 try => {
-    local(success) = false
+    var(success) = false
     handle(error_code == error_code_lspecInvalidResultFormat &&
            error_msg  == error_msg_lspecInvalidResultFormat) => 
     {
         failure_clear
         error_reset
-        #success = true
+        $success = true
     }
     
     lspec->formatResults('#')
-    if(not #success) => {
+    if(not $success) => {
         stdoutnl('Test Failed\n' + #test_desc)
         stdoutnl(currentCapture->callStack->split('\n')->first)
         abort
@@ -377,14 +377,14 @@ if(2 != (lspec->runTime / 1000000)) => {
 lspec_setupForTesting
 describe("Something") => {
     protect => {
-        local(success) = false
+        var(success) = false
         handle(error_code == error_code_lspecStopInTestGroup &&
                error_msg  == error_msg_lspecStopInTestGroup) => 
-        { #success = true }
+        { $success = true }
         lspec->stop
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
@@ -397,15 +397,15 @@ lspec_setupForTesting
 describe("Something") => {
     it("does something") => {
         try => {
-            local(success) = false
+            var(success) = false
             handle(error_code == error_code_lspecStopInTestGroup &&
                    error_msg  == error_msg_lspecStopInTestGroup) => 
-            { #success = true }
+            { $success = true }
             lspec->stop
         }
     }
 }
-if(not #success) => {
+if(not $success) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
