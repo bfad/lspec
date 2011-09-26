@@ -41,3 +41,6 @@ sourcefile(#f->readString, #f->path, true, false)->invoke
 
 local(f) = file(#path_here + 'lspec_expectations.test.inc')
 sourcefile(#f->readString, #f->path, true, false)->invoke
+
+local(f) = file(#path_here + 'lspec_local_scope.test.inc')
+sourcefile(#f->readString, #f->path, true, false)->invoke
