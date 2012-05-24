@@ -11,7 +11,7 @@ define call_lspec(args::staticarray=(:)) => {
     return (:#stdout, #stderr)
 }
 
-describe('rspec command') => {
+describe('lspec command') => {
     context('given a file path with no test groups') => {
         local(test_file) = file('/tmp/lspec.test')
         

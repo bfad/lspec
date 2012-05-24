@@ -104,6 +104,8 @@ define lspec_testSuite => type {
          
     // Configuration Options
     data private validFormats = (:'p', 'd'),
+                            // p => Progress, default
+                            // d => Documentation
          private options      = map(
                     'resultsFormat'  = "p",
                     'indentor'       = "    ",
