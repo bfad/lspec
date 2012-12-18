@@ -20,25 +20,29 @@ Installation
 
 ### Pre-compiled Libraries
 
-1. Click the big "Downloads" button next to the description on this page.
+1. Click the "Downloads" menu option at the top of this page.
 2. Choose the proper download for your platform
-3. Decompress the file and move it into `$LASSO9_HOME/LassoLibraries/`
+3. Decompress the files and move lspec to `$LASSO9_HOME/bin/` and lspec.so or lspec.dylib into `$LASSO9_HOME/LassoLibraries/`
 
 ### Compile From Source
 
     $> cd where/you/want/the/source/installed/
-    $> git clone https://github.com/bfad/lspec
+    $> git clone https://bitbucket.org/bfad/lspec.git
     $> cd lspec
     $> make
     $> make install
 
 _Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed. You can follow the instructions [here](http://hints.macworld.com/article.php?story=20110318050811544) to restore the 10.5 SDK to Xcode 4._
 
+### Set Your Path
+
+The installation instructions above specified that the lspec command utility be installed into `$LASSO9_HOME/bin/`. You may want to add that to your shell's `PATH` so you can just type `lspec` and not `$LASSO9_HOME/bin/lspec` from the command-line. (Check your shell's documentation to determine how to setup your PATH environment variable.)
+
 
 Example
 -------
 
-First, create a file named zoo.test.inc and write a test describing functionality you wish you had. (It's important that the test file ends with the extension '.test.inc'.)
+First, create a file named zoo.spec.inc and write a test describing functionality you wish you had. (It's important that the test file ends with the extension '.spec.inc'.)
 
     describe('Zoo') => {
         describe('addAnimal') => {
@@ -56,13 +60,9 @@ First, create a file named zoo.test.inc and write a test describing functionalit
         }
     }
     
-    // Needed when running using lasso9
-    // Will eventually run using an lspec execultable making this unnecessary.
-    lspec->stop
-    
 Then run the test and watch it fail.
 
-    $> lasso9 zoo.test.inc
+    $> lspec zoo.spec.inc
     F
 
     Failures:
@@ -71,12 +71,12 @@ Then run the test and watch it fail.
            Failure/Error: Unexpcted Error!
                Error Code: -9948
                 Error Msg: Definition Not Found: zoo()
-           # 3:9 /Path/To/zoo.test.inc
+           # 3:9 /Path/To/zoo.spec.inc
 
     Finished in 0.206136 seconds
     1 test, 1 failure
 
-Now add the following code to the beginning of zoo.test.inc. (Eventually, there will be a command-line tool to help automate the running of tests so that tests can be in separate files.)
+Now add the following code to the beginning of zoo.spec.inc. (Usually you would keep the tests in separate files and have them first include the code you are testing.)
     
     define zoo => type {
         data private animals = array
@@ -107,23 +107,11 @@ Now add the following code to the beginning of zoo.test.inc. (Eventually, there 
 
 With this code in place, re-run the test and watch it pass.
 
-    $> lasso9 zoo.test.inc
+    $> lspec zoo.spec.inc
     .
 
     Finished in 0.147116 seconds
     1 test, 0 failures
-
-
-To Do
------
-
-1. Create more [expect] test case helpers.
-
-2. Need before and after hooks for tests defined in the preceding test group(s).
-
-3. Create command line tool to automatically run all tests in a directory.
-
-4. Add color flag for terminal output.
 
 
 License
