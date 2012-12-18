@@ -3,6 +3,7 @@ define call_lspec(args::staticarray=(:)) => {
     local(stdout, stderr)
     local(my_process) = sys_process
     
+    handle => {#my_process->close}
     #my_process->open($lspec_path, #args)
     #my_process->wait
     #stdout = #my_process->read
@@ -28,7 +29,7 @@ describe('lspec command') => {
             
             local(stdout, stderr) = call_lspec((:#test_file->path))
             
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect('', #test_file->readString)
         }
         
@@ -37,7 +38,7 @@ describe('lspec command') => {
             
             local(stdout, stderr) = call_lspec((:#test_file->path))
             
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect(#expected, #stdout)
         }
     }
@@ -72,7 +73,7 @@ describe('lspec command') => {
             
             local(stdout, stderr) = call_lspec((:#test_file1->path, #test_file2->path, #test_file3->path))
             
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect('', #test_file1->readString)
             expect('', #test_file2->readString)
             expect('', #test_file3->readString)
@@ -83,7 +84,7 @@ describe('lspec command') => {
 
             local(stdout, stderr) = call_lspec((:#test_file1->path, #test_file2->path, #test_file3->path))
 
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect(#expected, #stdout)
         }
     }
@@ -113,14 +114,14 @@ describe('lspec command') => {
             it("doesn't execute the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect("file('" + #test_file->path + "')->openTruncate&close", #test_file->readString)
             }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect(#expected, #stdout)
             }
         }
@@ -136,14 +137,14 @@ describe('lspec command') => {
             it("executes the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect('', #test_file->readString)
             }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect(#expected, #stdout)
             }
         }
@@ -167,7 +168,7 @@ describe('lspec command') => {
             it("executes the files") => {
                 local(_, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect('', #test_file1->readString)
                 expect('', #test_file2->readString)
                 expect('', #test_file3->readString)
@@ -176,7 +177,7 @@ describe('lspec command') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect(#expected, #stdout)
             }
         }
@@ -193,14 +194,14 @@ describe('lspec command') => {
             it("executes the file") => {
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect('', #test_file->readString)
             }
             it('displays the "no test" summary') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect(#expected, #stdout)
             }
         }
@@ -222,7 +223,7 @@ describe('lspec command') => {
             it("executes the files") => {
                 local(_, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect('', #test_file1->readString)
                 expect('', #test_file2->readString)
                 expect('', #test_file3->readString)
@@ -231,7 +232,7 @@ describe('lspec command') => {
                 local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
                 
-                expect->null(#stderr)
+                expect(void == #stderr)
                 expect(#expected, #stdout)
             }
             
@@ -252,7 +253,7 @@ describe('lspec command') => {
                 it("executes the files") => {
                     local(_, stderr) = call_lspec((:#test_dir->path + 'spec'))
                     
-                    expect->null(#stderr)
+                    expect(void == #stderr)
                     expect('', #test_file1->readString)
                     expect('', #test_file2->readString)
                     expect('', #test_file3->readString)
@@ -261,7 +262,7 @@ describe('lspec command') => {
                     local(expected)       = '\n\nFinished in 0.000000 seconds\n0 tests, 0 failures\n'
                     local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
                     
-                    expect->null(#stderr)
+                    expect(void == #stderr)
                     expect(#expected, #stdout)
                 }
             }
@@ -286,7 +287,7 @@ describe('lspec command') => {
             // [dir->setCwd] can cause errors with lspec library, so
             // make sure to save off cwd first and set it back right after lspec call
             local(cwd)      = dir(io_file_getcwd)
-            local(expected) = error_code_resNotFound + ':' + error_msg_resNotFound
+            local(expected) = error_code_resNotFound + ':' + error_msg_resNotFound + ' - ./spec/'
             
             sys_process('/bin/rm', (:'-rf', #test_dir->path + 'spec/'))->wait
             
@@ -296,7 +297,7 @@ describe('lspec command') => {
             #cwd->setcwd
             
             expect(#expected, #stderr)
-            expect->null(#stdout)
+            expect(void == #stdout)
         }
         it("executes all the files with the test extension in the spec folder") => {
             local(cwd)        = dir(io_file_getcwd)
@@ -313,7 +314,7 @@ describe('lspec command') => {
             local(stdout, stderr) = call_lspec
             #cwd->setcwd
             
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect(#expected, #stdout)
             expect('', #test_file1->readString)
             expect('', #test_file2->readString)
@@ -336,11 +337,73 @@ describe('lspec command') => {
             local(stdout, stderr) = call_lspec
             #cwd->setcwd
             
-            expect->null(#stderr)
+            expect(void == #stderr)
             expect(#expected, #stdout)
             expect('', #test_file1->readString)
             expect('', #test_file2->readString)
             expect("file('" + #test_file3->path + "')->openTruncate&close", #test_file3->readString)
+        }
+    }
+    
+    
+    context('called with the -exts argument') => {
+        it('displays the usage message when no extensions list is passed') => {
+            local(stdout, stderr) = call_lspec((:'-exts'))
+            
+            expect(void == #stderr)
+            expect(#stdout->beginsWith('usage:'))
+        }
+        it("executes the specified file even if it doesn't have the extension") => {
+            local(f) = file('//tmp/lspec.test.rh')
+            #f->doWithClose => {
+                #f->writeString("file('" + #f->path + "')->openTruncate&close")
+            }
+            
+            local(stdout, stderr) = call_lspec((:#f->path, '-exts', 'lasso,inc'))
+            
+            expect(void == #stderr)
+            expect('', #f->readString)
+        }
+        it(`executes those files in a directory that end in .spec.[extension passed]`) => {
+            local(test_dir) = dir('//tmp/lspec/')
+            handle => { sys_process('/bin/rm', (:'-rf', #test_dir->path))->wait }
+            #test_dir->create
+            
+            local(test_file1) = file(#test_dir->path + 'foo1.spec.inc')
+            local(test_file2) = file(#test_dir->path + 'foo2.spec.lasso')
+            local(test_file3) = file(#test_dir->path + 'foo3.lasso')
+            #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+            #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+            #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+            
+            local(stdout, stderr) = call_lspec((:#test_dir->path, '-exts', 'lasso'))
+            
+            expect(void == #stderr)
+            expect('', #test_file2->readString)
+            expect("file('" + #test_file1->path + "')->openTruncate&close", #test_file1->readString)
+            expect("file('" + #test_file3->path + "')->openTruncate&close", #test_file3->readString)
+        }
+        it(`executes those files in a directory that end in .spec.[any of the csv extensions passed]`) => {
+            local(test_dir) = dir('//tmp/lspec/')
+            handle => { sys_process('/bin/rm', (:'-rf', #test_dir->path))->wait }
+            #test_dir->create
+            
+            local(test_file1) = file(#test_dir->path + 'foo1.spec.inc')
+            local(test_file2) = file(#test_dir->path + 'foo2.spec.lasso')
+            local(test_file3) = file(#test_dir->path + 'foo3.spec.rh')
+            local(test_file4) = file(#test_dir->path + 'foo4.rh')
+            #test_file1->writeString("file('" + #test_file1->path + "')->openTruncate&close")&close
+            #test_file2->writeString("file('" + #test_file2->path + "')->openTruncate&close")&close
+            #test_file3->writeString("file('" + #test_file3->path + "')->openTruncate&close")&close
+            #test_file4->writeString("file('" + #test_file4->path + "')->openTruncate&close")&close
+            
+            local(stdout, stderr) = call_lspec((:#test_dir->path, '-exts', 'lasso,rh'))
+            
+            expect(void == #stderr)
+            expect('', #test_file2->readString)
+            expect('', #test_file3->readString)
+            expect("file('" + #test_file1->path + "')->openTruncate&close", #test_file1->readString)
+            expect("file('" + #test_file4->path + "')->openTruncate&close", #test_file4->readString)
         }
     }
 }
