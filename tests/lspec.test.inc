@@ -4,15 +4,15 @@ not #path_here->endsWith('/') ? #path_here += '/'
 local(f) = file(#path_here + '../lspec.inc')
 sourcefile(#f->readString, #f->path, false, false)->invoke
 
-// [try] method developed by Bil Corey
+// [try] method: Based on code from Bil Corey
 define try => {
-    local(e) = pair(0='No error')
-    local(gb) = givenBlock
+    local(err) = null
+    local(gb)  = givenBlock
     protect => {
-        handle_error => { #e = pair(error_code = error_msg) }
+        handle_error => { #err = (: error_code, error_msg, error_stack) }
         #gB()
     }
-    #e->name != 0 ? fail(#e->name,#e->value)
+    null !== #err? fail(#err->get(1), #err->get(2), #err->get(3))
 }
 
 // Resets lspec for testing
