@@ -601,6 +601,50 @@ define expect->error(code::integer, msg::string) => {
 }
 
 /*
+* This expect statement catches any errors sent to its block and then
+* compares the error code with the given expected error code.
+*/
+define expect->errorCode(code::integer) => {
+    fail_if(not givenBlock,
+        error_code_missingGivenBlock, error_msg_missingGivenBlock)
+    
+    local(my_error) = error_code_noerror
+    protect => {
+        handle_error => { #my_error = error_code }
+        givenBlock()
+    }
+    
+    failure_clear
+    error_reset
+    
+    if(#my_error != #code) => {
+        .fail(string(#code), string(#my_error))
+    }
+}
+
+/*
+* This expect statement catches any errors sent to its block and then
+* compares the error message with the given expected error message.
+*/
+define expect->errorMsg(msg::string) => {
+    fail_if(not givenBlock,
+        error_code_missingGivenBlock, error_msg_missingGivenBlock)
+    
+    local(my_error) = error_msg_noerror
+    protect => {
+        handle_error => { #my_error = error_msg }
+        givenBlock()
+    }
+    
+    failure_clear
+    error_reset
+    
+    if(#my_error != #msg) => {
+        .fail(#msg, #my_error)
+    }
+}
+
+/*
 * This expect statement passes if there is any error in the
 * givenBlock and fails there is no error.
 */
