@@ -22,6 +22,14 @@ define lspec_setupForTesting => {
     lspec->suppressOutput
 }
 
+var(termColor) = map(
+		`normal`     = '' + decode_base64('Gw==') + '[0m',
+		`boldRed`    = '' + decode_base64('Gw==') + '[1;31;49m',
+		`boldGreen`  = '' + decode_base64('Gw==') + '[1;32;49m',
+		`boldYellow` = '' + decode_base64('Gw==') + '[1;33;49m',
+		`boldCyan`   = '' + decode_base64('Gw==') + '[1;36;49m',
+)
+
 
 // Runs the various test files
 local(f) = file(#path_here + 'lspec_testGroup.test.inc')
@@ -37,6 +45,9 @@ local(f) = file(#path_here + 'lspec_output_d.test.inc')
 sourcefile(#f->readString, #f->path, true, false)->invoke
 
 local(f) = file(#path_here + 'lspec_output_p.test.inc')
+sourcefile(#f->readString, #f->path, true, false)->invoke
+
+local(f) = file(#path_here + 'lspec_output_p_color.test.inc')
 sourcefile(#f->readString, #f->path, true, false)->invoke
 
 local(f) = file(#path_here + 'lspec_expectations.test.inc')

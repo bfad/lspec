@@ -110,6 +110,7 @@ define lspec_testSuite => type {
                     'resultsFormat'  = "p",
                     'indentor'       = "    ",
                     'suppressOutput' = false,
+										'colorOutput'    = false,
          )
     // Configuration Options Setters & Getters
     public options => .'options'
@@ -125,6 +126,10 @@ define lspec_testSuite => type {
     public isOutputSuppressed =>   .options->find('suppressOutput'),
            suppressOutput     => { .options->find('suppressOutput') = true  },
            showOutput         => { .options->find('suppressOutput') = false }
+		
+		public isOutputInColor =>   .options->find(`colorOutput`),
+ 		       noColor         => { .options->find(`colorOutput`) = false },
+					 useColor        => { .options->find(`colorOutput`) = true  }
            
     public resultsFormat => .options->find('resultsFormat')
     public formatResults(new::string) => {
@@ -132,6 +137,21 @@ define lspec_testSuite => type {
             error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
         .options->find('resultsFormat') = #new
     }
+		
+		// Color Stuff
+		data terminalColors = map(
+				`normal`     = decode_base64('Gw==') + '[0m',
+				`boldRed`    = decode_base64('Gw==') + '[1;31;49m',
+				`boldGreen`  = decode_base64('Gw==') + '[1;32;49m',
+				`boldYellow` = decode_base64('Gw==') + '[1;33;49m',
+				`boldCyan`   = decode_base64('Gw==') + '[1;36;49m',
+		)
+		public outputColor(color::string) => {
+			  not .isOutputInColor
+					  ? return ''
+
+			  return string(.'terminalColors'->get(#color))
+		}
     
     
     // Code to add test stuff to lspec test suite
@@ -211,7 +231,7 @@ define lspec_testSuite => type {
         
         local(spacer)    = ' ' * (.numPending->asString->size + 2)
         
-        .pendings == ''? .pendings += '\n\nPending:'
+        .pendings == ''? .pendings += '\n\n' + .outputColor(`boldYellow`) + 'Pending:' + .outputColor(`normal`)
         
         .pendings += '\n\n' + .indentor + .numPending + ') ' + .getCurrentTestGroup->label + ' ' + #test->label
         .pendings += '\n' + .indentor + #spacer + .indentor + '# ' + #test->location->first + ' ' + #test->location->second
@@ -238,7 +258,7 @@ define lspec_testSuite => type {
             }
         }
         
-        .failures == ''? .failures += '\n\nFailures:'
+        .failures == ''? .failures += '\n\n' + .outputColor(`boldRed`) + 'Failures:' + .outputColor(`normal`)
         
         .failures += '\n\n' + .indentor + .numFailures + ') ' + .currentTGroupLabels + ' ' + #test->label
         .failures += '\n' + .indentor + #spacer + 'Failure/Error: ' + #code
@@ -279,19 +299,19 @@ define lspec_testSuite => type {
             .output(' (FAILED - ' + .numFailures + ')')
         case('p')
             match(#status) => {
-            case('pending') .output('*')
-            case('success') .output('.')
-            case('fail')    .output('F')
+            case('pending') .output(.outputColor(`boldYellow`) + '*' + .outputColor(`normal`))
+            case('success') .output(.outputColor(`boldGreen`)  + '.' + .outputColor(`normal`))
+            case('fail')    .output(.outputColor(`boldRed`)    + 'F' + .outputColor(`normal`))
             }
         }
     }
     
     public outputSummary => {
         local(summary) = '\n\nFinished in ' + .runTimeSec + ' seconds\n'
-        #summary += .numTests + ' test' + (.numTests == 1 ? '' | 's')
-        #summary += ', ' + .numFailures + ' failure' + (.numFailures == 1 ? '' | 's')
+        #summary->append(''   + .outputColor(`boldCyan`) + .numTests    + .outputColor(`normal`) + ' test'    + (.numTests    == 1 ? '' | 's'))
+        #summary->append(', ' + .outputColor(`boldRed`)  + .numFailures + .outputColor(`normal`) + ' failure' + (.numFailures == 1 ? '' | 's'))
         .numPending > 0?
-            #summary += ', ' + .numPending + ' pending'
+            #summary->append(', ' + .outputColor(`boldYellow`) + .numPending + .outputColor(`normal`) + ' pending')
         .output(#summary)
     }
     public outputPendings => .output(.pendings)
