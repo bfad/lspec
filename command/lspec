@@ -23,6 +23,9 @@ Options
         Allows for specifying a comma-separated list of file extensions to be
         considered Lasso files. This is useful when specifying a directory - all
         files ending in .spec.[listed extensions] will be run.
+
+    -nocolor
+        Don't use terminal colors for the output.
         
     -h
         Displays this help and exits"
@@ -46,9 +49,10 @@ define lspec_runFile(f::file) => {
 }
 
 // Defaults
-local(exts)  = (:'inc')
-local(paths) = array
-local(mode)  = 'p'
+local(exts)      = (:'inc')
+local(paths)     = array
+local(mode)      = 'p'
+local(use_color) = true
 
 local(opts) = ($argv->asArray->remove(1,1)&)
 while(#opts->size > 0) => {
@@ -58,6 +62,9 @@ while(#opts->size > 0) => {
         
     case(bytes('-documentation'))
         #mode = 'd'
+
+    case(bytes('-nocolor'))
+        #use_color = false
         
     case(bytes('-exts'))
         #opts->size < 2
@@ -76,7 +83,9 @@ while(#opts->size > 0) => {
 #paths->size == 0
     ? #paths->insert('./spec/')
 
-lspec->formatResults(#mode)&useColor
+lspec->formatResults(#mode)
+
+#use_color? lspec->useColor
 
 with path in #paths 
 let f = file(#path)

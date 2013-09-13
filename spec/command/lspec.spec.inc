@@ -458,6 +458,57 @@ describe('lspec command') => {
             expect("file('" + #test_file4->path + "')->openTruncate&close", #test_file4->readString)
         }
     }
+
+    context('called with the -nocolor argument') => {
+        local(file_testPass) = file('//tmp/lspec.test.pass')
+        local(file_testFail) = file('//tmp/lspec.test.fail')
+        local(file_testPend) = file('//tmp/lspec.test.pend')
+        beforeAll => {
+            #file_testPass->doWithClose => {
+                #file_testPass->openTruncate&writeString("\
+                    describe('passing test') => { it('passes') => { expect(true) } }\
+                ")
+            }
+            #file_testFail->doWithClose => {
+                #file_testFail->openTruncate&writeString("\
+                    describe('failing test') => { it('fails') => { expect(false) } }\
+                ")
+            }
+            #file_testPend->doWithClose => {
+                #file_testPend->openTruncate&writeString("\
+                    describe('pending test') => { it('pends') => { } }\
+                ")
+            }
+        }
+        afterAll => {
+            #file_testPass->delete
+            #file_testFail->delete
+            #file_testPend->delete
+        }
+        it(`doesn't colorize passing tests`) => {
+            local(expected) = regexp("\\.\n\n" + `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures")
+            local(stdout, stderr) = call_lspec((:'-nocolor', #file_testPass->path))
+            
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+        it(`doesn't colorize failing tests`) => {
+            local(expected) = regexp("\\.\n\n" + `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures")
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+        it(`doesn't colorize pending tests'`) => {
+            local(expected) = regexp(
+                "\\*\n\nPending:\n\n    1\\) pending test pends\n           # 1:31 //tmp/lspec.test.pend\n\n" +
+                `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures, 1 pending"
+            )
+            local(stdout, stderr) = call_lspec((:'-nocolor', #file_testPend->path))
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+    }
 }
 
 lspec->stop
