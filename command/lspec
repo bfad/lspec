@@ -76,7 +76,7 @@ while(#opts->size > 0) => {
 #paths->size == 0
     ? #paths->insert('./spec/')
 
-lspec->formatResults(#mode)
+lspec->formatResults(#mode)&useColor
 
 with path in #paths 
 let f = file(#path)
