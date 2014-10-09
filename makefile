@@ -24,7 +24,7 @@ DEBUG_CMD =
 endif
 
 Darwin_DLL_FLAGS = -dynamiclib
-Darwin_LN_FLAGS = -isysroot $(SDK) -Wl,-syslibroot,$(SDK) -mmacosx-version-min=$(OSX_DEPLOY_VERS) -macosx_version_min=$(OSX_DEPLOY_VERS) -F/Library/Frameworks -framework Lasso9
+Darwin_LN_FLAGS = -isysroot $(SDK) -Wl,-syslibroot,$(SDK) -mmacosx-version-min=$(OSX_DEPLOY_VERS) -F/Library/Frameworks -framework Lasso9
 Darwin_DLL_EXT = .dylib
 Linux_DLL_FLAGS = -shared
 Linux_LN_FLAGS = -llasso9_runtime
