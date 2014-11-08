@@ -312,7 +312,7 @@ define lspec_testSuite => type {
         #summary->append(', ' + .outputColor(`boldRed`)  + .numFailures + .outputColor(`normal`) + ' failure' + (.numFailures == 1 ? '' | 's'))
         .numPending > 0?
             #summary->append(', ' + .outputColor(`boldYellow`) + .numPending + .outputColor(`normal`) + ' pending')
-        .output(#summary)
+        .output(#summary + '\n')
     }
     public outputPendings => .output(.pendings)
     public outputFailures => .output(.failures)

@@ -51,7 +51,7 @@ local(expected) = $termColor(`boldYellow`) + '*' + $termColor(`normal`) + '
 ' + lspec->indentor + '   ' + lspec->indentor + '# 43:5 ' + currentCapture->callsite_file + '
 
 Finished in ' + lspec->runTimeSec + ' seconds
-' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '0' + $termColor(`normal`) + ' failures, ' + $termColor(`boldYellow`) + '1' + $termColor(`normal`) + ' pending'
+' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '0' + $termColor(`normal`) + ' failures, ' + $termColor(`boldYellow`) + '1' + $termColor(`normal`) + ' pending\n'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -72,7 +72,7 @@ lspec->stop
 local(expected) = $termColor(`boldGreen`) + '.' + $termColor(`normal`) + '
 
 Finished in ' + lspec->runTimeSec + ' seconds
-' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '0' + $termColor(`normal`) + ' failures'
+' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '0' + $termColor(`normal`) + ' failures\n'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -101,7 +101,7 @@ local(expected) = $termColor(`boldRed`) + 'F' + $termColor(`normal`) + '
 ' + lspec->indentor + '   # 89:9 ' + currentCapture->callsite_file + '
 
 Finished in ' + lspec->runTimeSec + ' seconds
-' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '1' + $termColor(`normal`) + ' failure'
+' + $termColor(`boldCyan`) + '1' + $termColor(`normal`) + ' test, ' + $termColor(`boldRed`) + '1' + $termColor(`normal`) + ' failure\n'
 if(lspec->result != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)

@@ -432,7 +432,7 @@ if(not lspec->isStopped) => {
 #test_desc = "[lspec->stop] outputs final summary"
 lspec_setupForTesting
 lspec->stop
-local(expected_result) = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n0 tests, 0 failures'
+local(expected_result) = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n0 tests, 0 failures\n'
 if(lspec->result != #expected_result) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
@@ -449,7 +449,7 @@ describe("Something") => {
     }
 }
 lspec->stop
-local(expected_result) = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n1 test, 1 failure'
+local(expected_result) = '\n\nFinished in ' + lspec->runTimeSec + ' seconds\n1 test, 1 failure\n'
 if(not lspec->result->endsWith(#expected_result)) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
