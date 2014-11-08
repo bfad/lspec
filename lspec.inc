@@ -598,6 +598,17 @@ define expect->null(value) => {
 }
 
 /*
+* This expect statement runs the ->isA test on the value passed into it.
+* This should be used to check if the value is an object with the specified parent type or trait.
+* To check if the value is a specific type, I recommend using the following code:
+*    expect(::type, #value->type)
+*/
+define expect->valueIsA(value, check::tag) => {
+    not #value->isA(#check)?
+        .fail(#check->asString)
+}
+
+/*
 * This expect statement catches any errors sent to its block and then
 * compares the error with the given expected error.
 */

@@ -1034,3 +1034,74 @@ if(lspec->failures != #expected) => {
     stdoutnl('\nReceived\n' + lspec->failures)
     abort
 }
+
+
+
+#test_desc = "[expect->valueIsA] succeeds when it is passed a value that matches the passed tag using ->isA"
+lspec_setupForTesting
+describe("Something") => {
+    it("Does something") => {
+        expect->valueIsA(array, ::trait_forEach) => {}
+    }
+}
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[expect->valueIsA] fails when it is not passed a value that doesn't match the passed tag using ->isA"
+lspec_setupForTesting
+describe("Something") => {
+    it("Does something") => {
+        expect->valueIsA(0, ::trait_forEach) => {}
+    }
+}
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect->valueIsA(0, ::trait_forEach) => {}
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: trait_forEach
+' + lspec->indentor + '   ' + lspec->indentor + '     got: 
+' + lspec->indentor + '   # 1074:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
