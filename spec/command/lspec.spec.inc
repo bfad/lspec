@@ -493,7 +493,12 @@ describe('lspec command') => {
             expect(#stdout->asString->contains(#expected))
         }
         it(`doesn't colorize failing tests`) => {
-            local(expected) = regexp("\\.\n\n" + `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures")
+            local(expected) = regexp(
+                "F\n\nFailures:\n\n    1\\) failing test fails\n       Failure/Error: expect\\(false\\) \\} \\}\n" +
+                "           expected: true\n                got: false\n       # 1:48 //tmp/lspec\\.test\\.fail\n\n" +
+                `Finished in [0-9.]+ seconds` + "\n1 test, 1 failure"
+            )
+            local(stdout, stderr) = call_lspec((:'-nocolor', #file_testFail->path))
 
             expect(void == #stderr)
             expect(#stdout->asString->contains(#expected))
