@@ -340,7 +340,7 @@ describe('lspec command') => {
             // [dir->setCwd] can cause errors with lspec library, so
             // make sure to save off cwd first and set it back right after lspec call
             local(cwd)      = dir(io_file_getcwd)
-            local(expected) = error_code_resNotFound + ':' + error_msg_resNotFound + ' - ./spec/'
+            local(expected) = error_code_resNotFound + ':' + error_msg_resNotFound + ' - ./spec/' + sys_eol
             
             sys_process('/bin/rm', (:'-rf', #test_dir->path + 'spec/'))->wait
             
@@ -498,7 +498,7 @@ describe('lspec command') => {
             expect(void == #stderr)
             expect(#stdout->asString->contains(#expected))
         }
-        it(`doesn't colorize pending tests'`) => {
+        it(`doesn't colorize pending tests`) => {
             local(expected) = regexp(
                 "\\*\n\nPending:\n\n    1\\) pending test pends\n           # 1:31 //tmp/lspec.test.pend\n\n" +
                 `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures, 1 pending"

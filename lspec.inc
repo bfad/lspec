@@ -33,7 +33,7 @@ define error_code_lspecTestGroupInTest => 102
 define error_msg_lspecTestGroupInTest  => "The test group is in a test block"
 
 define error_code_lspecStopInTestGroup => 103
-define error_msg_lspecStopInTestGroup  => "Can not stop while in a test group"
+define error_msg_lspecStopInTestGroup  => "Cannot stop while in a test group"
     
 define error_code_lspecInvalidResultFormat => 104
 define error_msg_lspecInvalidResultFormat  => "You have specified an invalid result format"
@@ -48,7 +48,7 @@ define error_code_lspecTestGroupHasBeforeAll => 107
 define error_msg_lspecTestGroupHasBeforeAll  => "You have already specified a [beforeAll] block"
 
 define error_code_lspecTestGroupHasAfterAll => 108
-define error_msg_lspecTestGroupHasAfterAll  => "You have already specified a [afterAll] block"
+define error_msg_lspecTestGroupHasAfterAll  => "You have already specified an [afterAll] block"
 
 
 define lspec_testSuite => type {
@@ -110,7 +110,7 @@ define lspec_testSuite => type {
                     'resultsFormat'  = "p",
                     'indentor'       = "    ",
                     'suppressOutput' = false,
-										'colorOutput'    = false,
+                    'colorOutput'    = false,
          )
     // Configuration Options Setters & Getters
     public options => .'options'
@@ -126,10 +126,10 @@ define lspec_testSuite => type {
     public isOutputSuppressed =>   .options->find('suppressOutput'),
            suppressOutput     => { .options->find('suppressOutput') = true  },
            showOutput         => { .options->find('suppressOutput') = false }
-		
-		public isOutputInColor =>   .options->find(`colorOutput`),
- 		       noColor         => { .options->find(`colorOutput`) = false },
-					 useColor        => { .options->find(`colorOutput`) = true  }
+
+    public isOutputInColor =>   .options->find(`colorOutput`),
+           noColor         => { .options->find(`colorOutput`) = false },
+           useColor        => { .options->find(`colorOutput`) = true  }
            
     public resultsFormat => .options->find('resultsFormat')
     public formatResults(new::string) => {
@@ -137,23 +137,22 @@ define lspec_testSuite => type {
             error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
         .options->find('resultsFormat') = #new
     }
-		
-		// Color Stuff
-		data terminalColors = map(
-				`normal`     = decode_base64('Gw==') + '[0m',
-				`boldRed`    = decode_base64('Gw==') + '[1;31;49m',
-				`boldGreen`  = decode_base64('Gw==') + '[1;32;49m',
-				`boldYellow` = decode_base64('Gw==') + '[1;33;49m',
-				`boldCyan`   = decode_base64('Gw==') + '[1;36;49m',
-		)
-		public outputColor(color::string) => {
-			  not .isOutputInColor
-					  ? return ''
+    
+    // Color Stuff
+    data terminalColors = map(
+            `normal`     = decode_base64('Gw==') + '[0m',
+            `boldRed`    = decode_base64('Gw==') + '[1;31;49m',
+            `boldGreen`  = decode_base64('Gw==') + '[1;32;49m',
+            `boldYellow` = decode_base64('Gw==') + '[1;33;49m',
+            `boldCyan`   = decode_base64('Gw==') + '[1;36;49m',
+    )
+    public outputColor(color::string) => {
+        not .isOutputInColor? return ''
 
-			  return string(.'terminalColors'->get(#color))
-		}
-    
-    
+        return string(.'terminalColors'->get(#color))
+    }
+
+
     // Code to add test stuff to lspec test suite
     public addTestGroup(tg::lspec_testGroup) => {
         fail_if(.inTest, error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
@@ -180,7 +179,6 @@ define lspec_testSuite => type {
     }
     public addBeforeEach(block::capture) => {
         fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
-        
         .getCurrentTestGroup->beforeEach(#block)
     }
     public addAfterAll(block::capture) => {
@@ -189,7 +187,6 @@ define lspec_testSuite => type {
     }
     public addAfterEach(block::capture) => {
         fail_if(not .inTestGroup, error_code_lspecNotInTestGroup, error_msg_lspecNotInTestGroup)
-        
         .getCurrentTestGroup->afterEach(#block)
     }
     
@@ -243,13 +240,13 @@ define lspec_testSuite => type {
         .numFailures++
         
         local(spacer)    = ' ' * (.numFailures->asString->size + 2)
-        local(location)  = (not #error ? #test->failedTestCase->location | #test->location)
+        local(location)  = (not #error? #test->failedTestCase->location | #test->location)
         local(line_num)  = integer(#location->first->split(':')->first)
         local(col_num)   = integer(#location->first->split(':')->second)
         local(code)
         
         if(#error) => {
-            #code = 'Unexpcted Error!'
+            #code = 'Unexpected Error!'
         else
             local(f) = file(#location->second, file_openRead, file_modeLine)
             #f->doWithClose => {
@@ -282,7 +279,8 @@ define lspec_testSuite => type {
         'p' == .resultsFormat? return
         
         local(out) = (.indentor * .currentDepth) + #tg->label
-        .result != '' ? #out = '\n' + #out
+        .result != ''
+            ? #out = '\n' + #out
         .output(#out)
     }
     public output(test::lspec_test) => {
@@ -321,7 +319,7 @@ define lspec_testSuite => type {
 /*
 * Wrapper for the test suite.
 * This allows us to create one universal test suite object per thread. All
-* subsequent methods use this object, and so should users when necessary
+* subsequent methods use this object, and so should users when necessary.
 */
 define lspec => var(_lspec) || $_lspec := lspec_testSuite
 
@@ -590,7 +588,7 @@ define expect => type {
 }
 
 /*
-* This expect statement expects a null value to be passed into it
+* This expect statement expects a null value to be passed into it.
 */
 define expect->null(value) => {
     not #value->isA(::null)?
@@ -720,5 +718,6 @@ define expect->stdout(expected::string) => {
     
     local(did_read) = #read_test->readString
     
-    #did_read != #expected? .fail(#expected, #did_read)
+    #did_read != #expected
+        ? .fail(#expected, #did_read)
 }

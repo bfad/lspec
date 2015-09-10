@@ -4,7 +4,7 @@ not #path_here->endsWith('/') ? #path_here += '/'
 local(f) = file(#path_here + '../lspec.inc')
 sourcefile(#f->readString, #f->path, false, false)->invoke
 
-// [try] method: Based on code from Bil Corey
+// [try] method: Based on code from Bil Corry
 define try => {
     local(err) = null
     local(gb)  = givenBlock
