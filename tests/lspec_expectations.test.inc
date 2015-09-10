@@ -840,7 +840,7 @@ if(lspec->numFailures != 1) => {
 }
 local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '1) Something Does something
-' + lspec->indentor + '   Failure/Error: Unexpcted Error!
+' + lspec->indentor + '   Failure/Error: Unexpected Error!
 ' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
 ' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
 ' + lspec->indentor + '   # 804:5 ' + currentCapture->callsite_file

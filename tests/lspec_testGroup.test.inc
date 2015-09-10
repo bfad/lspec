@@ -12,7 +12,7 @@ if(lspec->suite->first->numTests != 2) => {
 
 
 
-#test_desc = "[describe] sub-test groups properly handled at the end of tests & outputed correctly"
+#test_desc = "[describe] sub-test groups properly handled at the end of tests & outputted correctly"
 lspec_setupForTesting
 var(flag1 = false, flag2 = false)
 describe("Something") => {
@@ -53,7 +53,7 @@ if(lspec->suite->first->numTests != 2) => {
 
 
 
-#test_desc = "[context] sub-test groups properly handled at the end of tests & outputed correctly"
+#test_desc = "[context] sub-test groups properly handled at the end of tests & outputted correctly"
 lspec_setupForTesting
 var(flag1 = false, flag2 = false)
 context("Something") => {
