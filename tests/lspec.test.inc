@@ -4,7 +4,7 @@ not #path_here->endsWith('/') ? #path_here += '/'
 local(f) = file(#path_here + '../lspec.inc')
 sourcefile(#f->readString, #f->path, false, false)->invoke
 
-// [try] method: Based on code from Bil Corey
+// [try] method: Based on code from Bil Corry
 define try => {
     local(err) = null
     local(gb)  = givenBlock
@@ -23,11 +23,11 @@ define lspec_setupForTesting => {
 }
 
 var(termColor) = map(
-		`normal`     = '' + decode_base64('Gw==') + '[0m',
-		`boldRed`    = '' + decode_base64('Gw==') + '[1;31;49m',
-		`boldGreen`  = '' + decode_base64('Gw==') + '[1;32;49m',
-		`boldYellow` = '' + decode_base64('Gw==') + '[1;33;49m',
-		`boldCyan`   = '' + decode_base64('Gw==') + '[1;36;49m',
+    `normal`     = '' + decode_base64('Gw==') + '[0m',
+    `boldRed`    = '' + decode_base64('Gw==') + '[1;31;49m',
+    `boldGreen`  = '' + decode_base64('Gw==') + '[1;32;49m',
+    `boldYellow` = '' + decode_base64('Gw==') + '[1;33;49m',
+    `boldCyan`   = '' + decode_base64('Gw==') + '[1;36;49m',
 )
 
 

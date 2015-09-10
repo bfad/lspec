@@ -578,7 +578,7 @@ describe("Something") => {
 }
 local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '1) Something does something
-' + lspec->indentor + '   Failure/Error: Unexpcted Error!
+' + lspec->indentor + '   Failure/Error: Unexpected Error!
 ' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
 ' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
 ' + lspec->indentor + '   # 574:5 ' + currentCapture->callsite_file
