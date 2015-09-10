@@ -510,5 +510,3 @@ describe('lspec command') => {
         }
     }
 }
-
-lspec->stop
