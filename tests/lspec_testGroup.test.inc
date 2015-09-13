@@ -601,3 +601,95 @@ if(#expected != $result) => {
     stdoutnl(currentCapture->callStack->split('\n')->first)
     abort
 }
+
+
+
+#test_desc = "A [shared_examples] block is not run on its own"
+lspec_setupForTesting
+describe("Something") => {
+	shared_examples('Shared examples') => {
+		it("Does something") => {}
+		it("Does something else") => {}
+	}
+}
+if(lspec->suite->first->numTests != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "[it_behaves_like] only runs tests that match its label"
+lspec_setupForTesting
+var(count = 0, flag = false)
+describe("Something") => {
+	shared_examples('Shared examples') => {
+		$count++
+	}
+	shared_examples('Other examples') => {
+		$flag = true
+	}
+	context('An aspect') => {
+		it_behaves_like('Shared examples')
+	}
+	context('Another aspect') => {
+		it_behaves_like('Shared examples')
+	}
+}
+if($count != 2 or $flag) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "An error is thrown if a [shared_examples] is defined twice"
+lspec_setupForTesting
+var(success) = false
+describe("Something") => {
+	shared_examples('Shared examples') => {
+		it("Does something") => {}
+	}
+    try => {
+        handle(error_code == error_code_lspecSharedTestGroupAlreadyExists &&
+               error_msg  == error_msg_lspecSharedTestGroupAlreadyExists) =>
+        {
+            failure_clear
+            error_reset
+            $success = true
+        }
+		shared_examples('Shared examples') => {
+			it("Does something") => {}
+		}
+    }
+}
+if(not $success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+
+
+
+#test_desc = "An error is thrown if [it_behaves_like] requests a non-existent shared example"
+lspec_setupForTesting
+var(success) = false
+describe("Something") => {
+    try => {
+        handle(error_code == error_code_lspecSharedTestGroupNotFound &&
+               error_msg  == error_msg_lspecSharedTestGroupNotFound) =>
+        {
+            failure_clear
+            error_reset
+            $success = true
+        }
+		it_behaves_like('Shared examples')
+    }
+}
+if(not $success) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}

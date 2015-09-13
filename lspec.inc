@@ -50,15 +50,23 @@ define error_msg_lspecTestGroupHasBeforeAll  => "You have already specified a [b
 define error_code_lspecTestGroupHasAfterAll => 108
 define error_msg_lspecTestGroupHasAfterAll  => "You have already specified an [afterAll] block"
 
+define error_code_lspecSharedTestGroupAlreadyExists => 109
+define error_msg_lspecSharedTestGroupAlreadyExists  => "The specified shared test group already exists"
+
+define error_code_lspecSharedTestGroupNotFound => 110
+define error_msg_lspecSharedTestGroupNotFound  => "The specified shared test group was not found"
+
 
 define lspec_testSuite => type {
     // Tallying up the test suite
     data private suite    = array,
+    	 private shared   = map,
          private result   = string,
          private failures = '',
          private pendings = ''
     // Tally Getters
     public suite    => .'suite',
+           shared   => .'shared',
            result   => .'result',
            failures => .'failures',
            pendings => .'pendings'
@@ -154,6 +162,10 @@ define lspec_testSuite => type {
 
 
     // Code to add test stuff to lspec test suite
+    public addSharedGroup(label::string, block::capture) => {
+        fail_if(.inTest, error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
+        .shared->insert(pair(#label, #block))
+    }
     public addTestGroup(tg::lspec_testGroup) => {
         fail_if(.inTest, error_code_lspecTestGroupInTest, error_msg_lspecTestGroupInTest)
         
@@ -514,6 +526,22 @@ define describe(label) => {
 define context(label) =>  {
     lspec->isStopped? lspec_clearSuite
     lspec->addTestGroup(lspec_testGroup(#label, givenBlock))
+}
+
+/*
+* Wrappers for sharing test groups among other test groups
+*/
+define shared_examples(label) => {
+    fail_if(lspec->shared->contains(#label),
+        error_code_lspecSharedTestGroupAlreadyExists, error_msg_lspecSharedTestGroupAlreadyExists)
+    lspec->isStopped? lspec_clearSuite
+    lspec->addSharedGroup(#label, givenBlock)
+}
+define it_behaves_like(label) => {
+    fail_if(not lspec->shared->contains(#label),
+        error_code_lspecSharedTestGroupNotFound, error_msg_lspecSharedTestGroupNotFound)
+    lspec->isStopped? lspec_clearSuite
+    lspec->addTestGroup(lspec_testGroup('behaves like '+#label, lspec->shared->get(#label)))
 }
 
 
