@@ -607,10 +607,10 @@ if(#expected != $result) => {
 #test_desc = "A [shared_examples] block is not run on its own"
 lspec_setupForTesting
 describe("Something") => {
-	shared_examples('Shared examples') => {
-		it("Does something") => {}
-		it("Does something else") => {}
-	}
+    shared_examples('Shared examples') => {
+        it("Does something") => {}
+        it("Does something else") => {}
+    }
 }
 if(lspec->suite->first->numTests != 0) => {
     stdoutnl('Test Failed\n' + #test_desc)
@@ -624,18 +624,18 @@ if(lspec->suite->first->numTests != 0) => {
 lspec_setupForTesting
 var(count = 0, flag = false)
 describe("Something") => {
-	shared_examples('Shared examples') => {
-		$count++
-	}
-	shared_examples('Other examples') => {
-		$flag = true
-	}
-	context('An aspect') => {
-		it_behaves_like('Shared examples')
-	}
-	context('Another aspect') => {
-		it_behaves_like('Shared examples')
-	}
+    shared_examples('Shared examples') => {
+        $count++
+    }
+    shared_examples('Other examples') => {
+        $flag = true
+    }
+    context('An aspect') => {
+        it_behaves_like('Shared examples')
+    }
+    context('Another aspect') => {
+        it_behaves_like('Shared examples')
+    }
 }
 if($count != 2 or $flag) => {
     stdoutnl('Test Failed\n' + #test_desc)
@@ -649,9 +649,9 @@ if($count != 2 or $flag) => {
 lspec_setupForTesting
 var(success) = false
 describe("Something") => {
-	shared_examples('Shared examples') => {
-		it("Does something") => {}
-	}
+    shared_examples('Shared examples') => {
+        it("Does something") => {}
+    }
     try => {
         handle(error_code == error_code_lspecSharedTestGroupAlreadyExists &&
                error_msg  == error_msg_lspecSharedTestGroupAlreadyExists) =>
@@ -660,9 +660,9 @@ describe("Something") => {
             error_reset
             $success = true
         }
-		shared_examples('Shared examples') => {
-			it("Does something") => {}
-		}
+        shared_examples('Shared examples') => {
+            it("Does something") => {}
+        }
     }
 }
 if(not $success) => {
@@ -685,7 +685,7 @@ describe("Something") => {
             error_reset
             $success = true
         }
-		it_behaves_like('Shared examples')
+        it_behaves_like('Shared examples')
     }
 }
 if(not $success) => {

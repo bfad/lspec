@@ -60,7 +60,7 @@ define error_msg_lspecSharedTestGroupNotFound  => "The specified shared test gro
 define lspec_testSuite => type {
     // Tallying up the test suite
     data private suite    = array,
-    	 private shared   = map,
+         private shared   = map,
          private result   = string,
          private failures = '',
          private pendings = ''

@@ -23,11 +23,11 @@ define lspec_setupForTesting => {
 }
 
 var(termColor) = map(
-		`normal`     = '' + decode_base64('Gw==') + '[0m',
-		`boldRed`    = '' + decode_base64('Gw==') + '[1;31;49m',
-		`boldGreen`  = '' + decode_base64('Gw==') + '[1;32;49m',
-		`boldYellow` = '' + decode_base64('Gw==') + '[1;33;49m',
-		`boldCyan`   = '' + decode_base64('Gw==') + '[1;36;49m',
+    `normal`     = '' + decode_base64('Gw==') + '[0m',
+    `boldRed`    = '' + decode_base64('Gw==') + '[1;31;49m',
+    `boldGreen`  = '' + decode_base64('Gw==') + '[1;32;49m',
+    `boldYellow` = '' + decode_base64('Gw==') + '[1;33;49m',
+    `boldCyan`   = '' + decode_base64('Gw==') + '[1;36;49m',
 )
 
 
