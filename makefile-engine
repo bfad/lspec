@@ -42,7 +42,7 @@ endif
 
 # native compiler flags
 Darwin_ARCH = -arch $(ARCH)
-Darwin_CPPFLAGS += $(MACOSX_VERSION_MIN) -F/Library/Frameworks -I/Library/Frameworks/Lasso9.framework/Headers -DMACHINE_MACOSX #-D_PTHREADS
+Darwin_CPPFLAGS += $(MACOSX_VERSION_MIN) -F/Library/Frameworks -I/Library/Frameworks/Lasso9.framework/Headers -pthread -DMACHINE_MACOSX
 Darwin_CFLAGS +=
 Darwin_Lib_LDFLAGS ?= -dynamiclib # allow override if -bundle is required
 Darwin_LDFLAGS += $(MACOSX_VERSION_MIN) -F/Library/Frameworks
@@ -53,11 +53,11 @@ Darwin_LIB_EXT = dylib
 ## Linux
 # native compiler flags
 Linux_ARCH = -march=$(subst _,-,$(ARCH))
-Linux_CPPFLAGS += -I/usr/include/Lasso9 -DMACHINE_LINUX
+Linux_CPPFLAGS += -I/usr/include/Lasso9 -pthread -DMACHINE_LINUX
 Linux_CFLAGS += -Wno-multichar
-Linux_Lib_LDFLAGS += -shared -Wl,-Bsymbolic
-Linux_LDFLAGS +=
-Linux_LDLIBS += -llasso9_runtime -lm
+Linux_Lib_LDFLAGS += -shared -Wl,-Bsymbolic -Wl,--no-undefined
+Linux_LDFLAGS += -pthread
+Linux_LDLIBS += -llasso9_runtime -ldl -lm -lrt
 Linux_LIB_EXT = so
 
 
