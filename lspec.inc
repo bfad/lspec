@@ -252,7 +252,9 @@ define lspec_testSuite => type {
             #code = 'Unexpcted Error!'
         else
             local(f) = file(#location->second, file_openRead, file_modeLine)
-            #f->doWithClose => {
+            
+            #f->exists // Need to ensure this can work with non-existant files
+            ? #f->doWithClose => {
                 loop(#line_num - 1) => {#f->get}
                 #code = #f->get->sub(#col_num)
             }
@@ -316,6 +318,15 @@ define lspec_testSuite => type {
     }
     public outputPendings => .output(.pendings)
     public outputFailures => .output(.failures)
+
+    public asString => {
+        .outputSummary
+        .outputFailures
+        return .result
+    }
+
+
+
 }
 
 /*
