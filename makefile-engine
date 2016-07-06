@@ -42,10 +42,9 @@ endif
 
 # native compiler flags
 Darwin_ARCH = -arch $(ARCH)
-Darwin_CPPFLAGS += $(MACOSX_VERSION_MIN) -F/Library/Frameworks -I/Library/Frameworks/Lasso9.framework/Headers -pthread -DMACHINE_MACOSX
-Darwin_CFLAGS +=
-Darwin_Lib_LDFLAGS ?= -dynamiclib # allow override if -bundle is required
-Darwin_LDFLAGS += $(MACOSX_VERSION_MIN) -F/Library/Frameworks
+Darwin_CPPFLAGS += -DMACHINE_MACOSX -F/Library/Frameworks -I/Library/Frameworks/Lasso9.framework/Headers $(MACOSX_VERSION_MIN)
+Darwin_Lib_LDFLAGS += -dynamiclib -Wl,-undefined,error
+Darwin_LDFLAGS += -F/Library/Frameworks $(MACOSX_VERSION_MIN)
 Darwin_LDLIBS += -framework Lasso9
 Darwin_LIB_EXT = dylib
 
@@ -53,8 +52,7 @@ Darwin_LIB_EXT = dylib
 ## Linux
 # native compiler flags
 Linux_ARCH = -march=$(subst _,-,$(ARCH))
-Linux_CPPFLAGS += -I/usr/include/Lasso9 -pthread -DMACHINE_LINUX
-Linux_CFLAGS += -Wno-multichar
+Linux_CPPFLAGS += -DMACHINE_LINUX -I/usr/include/Lasso9 -fPIC -Wno-multichar
 Linux_Lib_LDFLAGS += -shared -Wl,-Bsymbolic -Wl,--no-undefined
 Linux_LDFLAGS += -pthread
 Linux_LDLIBS += -llasso9_runtime -ldl -lm -lrt
@@ -63,9 +61,9 @@ Linux_LIB_EXT = so
 
 ## All platforms
 # compiler flags
-CPPFLAGS = $($(OS)_CPPFLAGS) $(DEBUG_FLAGS) #-I.
-CFLAGS = $($(OS)_CFLAGS) -fshort-wchar -fPIC
-CXXFLAGS = $($(OS)_CXXFLAGS) $(CFLAGS) #-Wno-deprecated
+CPPFLAGS = $($(OS)_CPPFLAGS) $(DEBUG_FLAGS) -pthread -fshort-wchar
+CFLAGS = $($(OS)_CFLAGS)
+CXXFLAGS = $($(OS)_CXXFLAGS) #-Wno-deprecated
 LDFLAGS = $($(OS)_LDFLAGS) $(DEBUG_FLAGS)
 LDLIBS = $($(OS)_LDLIBS)
 
@@ -157,6 +155,8 @@ $(TARGET).$(LIB_EXT).install mod.install: | $(MOD_DST)
 	@install -v $*.$(ZIP_EXT) $|/ || :
 %.bin.install: | $(BIN_DST)
 	@$(shell [ -w $| ] || echo sudo) install -v $* $|/ || :
+%.bin.uninstall: | $(BIN_DST)
+	$(shell [ -w $| ] || echo sudo) rm -f $|/$*
 
 # create directories from absolute paths
 /%:
