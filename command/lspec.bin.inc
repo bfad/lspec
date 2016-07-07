@@ -6,11 +6,11 @@ define usage(exit_status::integer=-1) => {
 usage: " + #cmd + " [options] [file or directory paths]
 
     The " + #cmd + " command executes the Lasso code in the specified file or
-    all Lasso files in the specified directory. If no file or directory path is 
+    all Lasso files in the specified directory. If no file or directory path is
     specified, then it tries a relative directory named \"spec\".
     
     When a directory is specified (or when using the default \"spec\" directory),
-    the command executes all files ending in \".spec.inc\" in that directory. Then 
+    the command executes all files ending in \".spec.inc\" in that directory. Then
     it proceeds to do the same thing in any nested directories. (To specify what
     extensions are considered Lasso files, see the \"-exts\" option.)
 
@@ -87,7 +87,7 @@ lspec->formatResults(#mode)
 
 #use_color? lspec->useColor
 
-with path in #paths 
+with path in #paths
 let f = file(#path)
 do {
     if(not #f->exists) => {

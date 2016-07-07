@@ -123,7 +123,7 @@ define lspec_testSuite => type {
     // Configuration Options Setters & Getters
     public options => .'options'
     public setOptions(new::map) => {
-        with key in .'options'->keys 
+        with key in .'options'->keys
         do {
             #new->contains(#key)? .'options'->find(#key) = #new->find(#key)
         }
@@ -141,7 +141,7 @@ define lspec_testSuite => type {
            
     public resultsFormat => .options->find('resultsFormat')
     public formatResults(new::string) => {
-        fail_if(not .validFormats->contains(#new), 
+        fail_if(not .validFormats->contains(#new),
             error_code_lspecInvalidResultFormat, error_msg_lspecInvalidResultFormat)
         .options->find('resultsFormat') = #new
     }
@@ -361,7 +361,7 @@ define lspec_testGroup => type {
          private parentGroup  = null,
          private currentTest  = 0,
          private currentGroup = 0
-     // Getters
+    // Getters
      public label        => .'label',
             parentSuite  => .'suite',
             tests        => .'tests',
@@ -427,7 +427,6 @@ define lspec_testGroup => type {
         .currentTest = 0
         .tests->forEach => {
             .currentTest++
-            
             .parentSuite->runCurrentBeforeEach
             #1->run
             .runAfterEaches
@@ -437,7 +436,7 @@ define lspec_testGroup => type {
             .currentGroup++
             .parentSuite->incGroupDepth
             #1->parentGroup = self
-            #1->run 
+            #1->run
             .parentSuite->decGroupDepth
         }
     }
@@ -460,7 +459,7 @@ define lspec_test => type {
            location       => .'location',
            failedTestCase => .'failedTestCase'
     // Setters
-    public failed(test_case::expect)   => {
+    public failed(test_case::expect) => {
         .status = 'fail'
         .failedTestCase = #test_case
     }
@@ -541,7 +540,7 @@ define it_behaves_like(label) => {
     fail_if(not lspec->shared->contains(#label),
         error_code_lspecSharedTestGroupNotFound, error_msg_lspecSharedTestGroupNotFound)
     lspec->isStopped? lspec_clearSuite
-    lspec->addTestGroup(lspec_testGroup('behaves like '+#label, lspec->shared->get(#label)))
+    lspec->addTestGroup(lspec_testGroup('behaves like ' + #label, lspec->shared->get(#label)))
 }
 
 
@@ -707,7 +706,7 @@ define expect->errorMsg(msg::string) => {
 */
 define expect->error => {
     fail_if(not givenBlock,
-    error_code_missingGivenBlock, error_msg_missingGivenBlock)
+        error_code_missingGivenBlock, error_msg_missingGivenBlock)
 
     local(my_error) = pair(error_code_noerror=error_msg_noerror)
     protect => {

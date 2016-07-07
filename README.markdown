@@ -32,7 +32,7 @@ Installation
     $> make
     $> make install
 
-_Note: If you're compiling on Mac OS X, you'll need the Xcode command-line tools installed._
+_Note: If you're compiling on Mac OS X, you'll need Xcode installed._
 
 ### Set Your Path
 
