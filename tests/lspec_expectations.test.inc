@@ -167,7 +167,7 @@ if(lspec->failures != #expected) => {
 
 
 
-local(test_desc) = "[expect->error] with no args raises an error if it's not passed a block"
+#test_desc = "[expect->error] with no args raises an error if it's not passed a block"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
@@ -284,7 +284,7 @@ if(lspec->failures != #expected) => {
 //
 // [expect->errorCode] //
 //
-local(test_desc) = "[expect->errorCode] raises an error if it's not passed a block"
+#test_desc = "[expect->errorCode] raises an error if it's not passed a block"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
@@ -452,7 +452,7 @@ if(lspec->failures != #expected) => {
 
 
 
-local(test_desc) = "[expect->errorCode] with no args raises an error"
+#test_desc = "[expect->errorCode] with no args raises an error"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
@@ -494,7 +494,7 @@ if(lspec->numFailures != 1) => {
 //
 // [expect->errorMsg] //
 //
-local(test_desc) = "[expect->errorMsg] raises an error if it's not passed a block"
+#test_desc = "[expect->errorMsg] raises an error if it's not passed a block"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
@@ -662,7 +662,7 @@ if(lspec->failures != #expected) => {
 
 
 
-local(test_desc) = "[expect->errorMsg] with no args raises an error"
+#test_desc = "[expect->errorMsg] with no args raises an error"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
@@ -840,7 +840,7 @@ if(lspec->numFailures != 1) => {
 }
 local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '1) Something Does something
-' + lspec->indentor + '   Failure/Error: Unexpcted Error!
+' + lspec->indentor + '   Failure/Error: Unexpected Error!
 ' + lspec->indentor + '   ' + lspec->indentor + 'Error Code: ' + error_code_divideByZero + '
 ' + lspec->indentor + '   ' + lspec->indentor + ' Error Msg: ' + error_msg_divideByZero + '
 ' + lspec->indentor + '   # 804:5 ' + currentCapture->callsite_file
@@ -1037,11 +1037,54 @@ if(lspec->failures != #expected) => {
 
 
 
+#test_desc = "[expect(expect, got, -useStrict)] fails when expect !== got"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect(123, 123.0, -useStrict)
+    }
+}
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect(123, 123.0, -useStrict)
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: (integer) 123
+' + lspec->indentor + '   ' + lspec->indentor + '     got: (decimal) 123.000000
+' + lspec->indentor + '   # 1044:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    stdoutnl('\nExpected\n' + #expected)
+    stdoutnl('\nReceived\n' + lspec->failures)
+    abort
+}
+
+
+
 #test_desc = "[expect->valueIsA] succeeds when it is passed a value that matches the passed tag using ->isA"
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
-        expect->valueIsA(array, ::trait_forEach) => {}
+        expect->valueIsA(::trait_forEach, array) => {}
     }
 }
 if(lspec->numTests != 1) => {
@@ -1071,7 +1114,7 @@ if(lspec->numFailures != 0) => {
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
-        expect->valueIsA(0, ::trait_forEach) => {}
+        expect->valueIsA(::trait_forEach, 0) => {}
     }
 }
 if(lspec->numTests != 1) => {
@@ -1096,10 +1139,10 @@ if(lspec->numFailures != 1) => {
 }
 local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '1) Something does something
-' + lspec->indentor + '   Failure/Error: expect->valueIsA(0, ::trait_forEach) => {}
+' + lspec->indentor + '   Failure/Error: expect->valueIsA(::trait_forEach, 0) => {}
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: trait_forEach
-' + lspec->indentor + '   ' + lspec->indentor + '     got: 
-' + lspec->indentor + '   # 1074:9 ' + currentCapture->callsite_file
+' + lspec->indentor + '   ' + lspec->indentor + '     got: integer
+' + lspec->indentor + '   # 1117:9 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)

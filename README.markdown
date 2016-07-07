@@ -21,8 +21,8 @@ Installation
 ### Pre-compiled Libraries
 
 1. Click the "Downloads" menu option at the top of this page.
-2. Choose the proper download for your platform
-3. Decompress the files and move lspec to `$LASSO9_HOME/bin/` and lspec.so or lspec.dylib into `$LASSO9_HOME/LassoLibraries/`
+2. Choose the proper download for your platform.
+3. Decompress the files and move lspec to `$LASSO9_HOME/bin/` and lspec.so or lspec.dylib into `$LASSO9_HOME/LassoLibraries/`.
 
 ### Compile From Source
 
@@ -32,7 +32,7 @@ Installation
     $> make
     $> make install
 
-_Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed. You can follow the instructions [here](http://hints.macworld.com/article.php?story=20110318050811544) to restore the 10.5 SDK to Xcode 4._
+_Note: If you're compiling on Mac OS X, you'll need Xcode installed._
 
 ### Set Your Path
 
@@ -68,7 +68,7 @@ Then run the test and watch it fail.
     Failures:
 
         1) Zoo addAnimal inserts an animal into the zoo and increases numberOfAnimals by 1
-           Failure/Error: Unexpcted Error!
+           Failure/Error: Unexpected Error!
                Error Code: -9948
                 Error Msg: Definition Not Found: zoo()
            # 3:9 /Path/To/zoo.spec.inc
