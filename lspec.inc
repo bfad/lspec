@@ -628,10 +628,11 @@ define expect->null(value) => {
 * To check if the value is a specific type, I recommend using the following code:
 *    expect(::type, #value->type)
 */
-define expect->valueIsA(value, check::tag) => {
+define expect->valueIsA(check::tag, value) => {
     not #value->isA(#check)?
-        .fail(#check->asString)
+        .fail(#check->asString, #value->type->asString)
 }
+define expect->valueIsA(value, check::tag) => expect->valueIsA(#check, #value) // original argument order
 
 /*
 * This expect statement catches any errors sent to its block and then

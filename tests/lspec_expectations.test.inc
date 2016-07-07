@@ -1041,7 +1041,7 @@ if(lspec->failures != #expected) => {
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
-        expect->valueIsA(array, ::trait_forEach) => {}
+        expect->valueIsA(::trait_forEach, array) => {}
     }
 }
 if(lspec->numTests != 1) => {
@@ -1071,7 +1071,7 @@ if(lspec->numFailures != 0) => {
 lspec_setupForTesting
 describe("Something") => {
     it("Does something") => {
-        expect->valueIsA(0, ::trait_forEach) => {}
+        expect->valueIsA(::trait_forEach, 0) => {}
     }
 }
 if(lspec->numTests != 1) => {
@@ -1096,9 +1096,9 @@ if(lspec->numFailures != 1) => {
 }
 local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '1) Something does something
-' + lspec->indentor + '   Failure/Error: expect->valueIsA(0, ::trait_forEach) => {}
+' + lspec->indentor + '   Failure/Error: expect->valueIsA(::trait_forEach, 0) => {}
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: trait_forEach
-' + lspec->indentor + '   ' + lspec->indentor + '     got: 
+' + lspec->indentor + '   ' + lspec->indentor + '     got: integer
 ' + lspec->indentor + '   # 1074:9 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
