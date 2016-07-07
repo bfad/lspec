@@ -603,8 +603,10 @@ define expect => type {
         .onCreate
         not #test_case? .fail(#expected, #got)
     }
-    public onCreate(expected, got) => {
-        .onCreate(#expected == #got, #expected->asString, #got->asString)
+    public onCreate(expected, got, -useStrict::boolean=false) => {
+        #useStrict?
+            .onCreate(#expected === #got, '(' + #expected->type + ') ' + #expected, '(' + #got->type + ') ' + #got)
+            | .onCreate(#expected == #got, #expected->asString, #got->asString)
     }
     
     private fail(expected::string='', got::string='') => {
