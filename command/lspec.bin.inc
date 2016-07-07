@@ -45,7 +45,13 @@ define lspec_runDir(d::dir, ext::staticarray=(:'inc')) => {
 }
 
 define lspec_runFile(f::file) => {
-    sourcefile(#f, -autoCollect=false)->invoke
+    protect => {
+        handle_failure => {
+            error_code != error_code_aborted ?
+                stdoutnl('\nError Code: ' + error_code + '\nError Msg: ' + error_msg + '\nError Stack:\n\n' + error_stack + '\n')
+        }
+        sourcefile(#f, -autoCollect=false)->invoke
+    }
 }
 
 // Defaults
