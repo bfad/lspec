@@ -27,12 +27,12 @@ Installation
 ### Compile From Source
 
     $> cd where/you/want/the/source/installed/
-    $> git clone https://bitbucket.org/bfad/lspec.git
+    $> git clone https://github.com/bfad/lspec.git
     $> cd lspec
     $> make
     $> make install
 
-_Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed. You can follow the instructions [here](http://hints.macworld.com/article.php?story=20110318050811544) to restore the 10.5 SDK to Xcode 4._
+_Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed to build a library for all supported versions. You can follow [these instructions](https://github.com/devernay/xcodelegacy) to restore the 10.5 SDK to Xcode 4 and later._
 
 ### Set Your Path
 
@@ -50,16 +50,16 @@ First, create a file named zoo.spec.inc and write a test describing functionalit
                 local(menagerie) = zoo
                 local(num_animals_start) = #menagerie->numberOfAnimals
                 local(num_animals_end)
-                
+
                 #menagerie->addAnimal(animal('Rhino'))
                 #num_animals_end = #menagerie->numberOfAnimals
-                
+
                 expect(#menagerie->hasA('Rhino'))
                 expect(#num_animals_end == 1 + #num_animals_start)
             }
         }
     }
-    
+
 Then run the test and watch it fail.
 
     $> lspec zoo.spec.inc
@@ -77,7 +77,7 @@ Then run the test and watch it fail.
     1 test, 1 failure
 
 Now add the following code to the beginning of zoo.spec.inc. (Usually you would keep the tests in separate files and have them first include the code you are testing.)
-    
+
     define zoo => type {
         data private animals = array
 
