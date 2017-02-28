@@ -87,7 +87,7 @@ describe('lspec command') => {
         }
         
         it('displays the "no test" summary') => {
-            local(expected) = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+            local(expected) = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
             
             local(stdout, stderr) = call_lspec((:#test_file->path))
             
@@ -133,7 +133,7 @@ describe('lspec command') => {
         }
 
         it('displays the "no test" summary') => {
-            local(expected) = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+            local(expected) = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
 
             local(stdout, stderr) = call_lspec((:#test_file1->path, #test_file2->path, #test_file3->path))
 
@@ -171,7 +171,7 @@ describe('lspec command') => {
                 expect("file('" + #test_file->path + "')->openTruncate&close", #test_file->readString)
             }
             it('displays the "no test" summary') => {
-                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
                 expect(void == #stderr)
@@ -194,7 +194,7 @@ describe('lspec command') => {
                 expect('', #test_file->readString)
             }
             it('displays the "no test" summary') => {
-                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
                 expect(void == #stderr)
@@ -227,7 +227,7 @@ describe('lspec command') => {
                 expect('', #test_file3->readString)
             }
             it('displays the "no test" summary') => {
-                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
                 expect(void == #stderr)
@@ -251,7 +251,7 @@ describe('lspec command') => {
                 expect('', #test_file->readString)
             }
             it('displays the "no test" summary') => {
-                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec'))
                 
                 expect(void == #stderr)
@@ -282,7 +282,7 @@ describe('lspec command') => {
                 expect('', #test_file3->readString)
             }
             it('displays the "no test" summary') => {
-                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                 local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
                 
                 expect(void == #stderr)
@@ -312,7 +312,7 @@ describe('lspec command') => {
                     expect('', #test_file3->readString)
                 }
                 it('displays the "no test" summary') => {
-                    local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+                    local(expected)       = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
                     local(stdout, stderr) = call_lspec((:#test_dir->path + 'spec/sub1', #test_dir->path + 'spec/sub2', #test_dir->path + 'spec/sub3'))
                     
                     expect(void == #stderr)
@@ -354,7 +354,7 @@ describe('lspec command') => {
         }
         it("executes all the files with the test extension in the spec folder") => {
             local(cwd)        = dir(io_file_getcwd)
-            local(expected)   = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n'
+            local(expected)   = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
             local(test_file1) = file(#test_dir->path + 'spec/foo1.spec.inc')
             local(test_file2) = file(#test_dir->path + 'spec/foo2.spec.inc')
             local(test_file3) = file(#test_dir->path + 'spec/foo3.expt.inc')
@@ -511,4 +511,3 @@ describe('lspec command') => {
     }
 }
 
-lspec->stop
