@@ -86,6 +86,18 @@ describe('lspec command') => {
             expect('', #test_file->readString)
         }
         
+        it('errors on bad syntax') => {
+            #test_file->doWithClose => {
+                #test_file->writeString("#missing")
+            }
+            
+            local(stdout, stderr) = call_lspec((:#test_file->path))
+            
+            expect(void == #stderr)
+            expect(#stdout->asString->contains('/tmp/lspec.test: The local variable "missing" has not been defined'))
+            expect('#missing', #test_file->readString)
+        }
+        
         it('displays the "no test" summary') => {
             local(expected) = '\n\nFinished in 0.000000 seconds\n' + $termColor('boldCyan') + '0' + $termColor('normal') + ' tests, ' + $termColor('boldRed') + '0' + $termColor('normal') + ' failures\n\n'
             
