@@ -493,7 +493,12 @@ describe('lspec command') => {
             expect(#stdout->asString->contains(#expected))
         }
         it(`doesn't colorize failing tests`) => {
-            local(expected) = regexp("\\.\n\n" + `Finished in [0-9.]+ seconds` + "\n1 test, 0 failures")
+            local(expected) = regexp(
+                "F\n\nFailures:\n\n    1\\) failing test fails\n       Failure/Error: expect\\(false\\) \\} \\}\n" +
+                "           expected: true\n                got: false\n       # 1:48 //tmp/lspec\\.test\\.fail\n\n" +
+                `Finished in [0-9.]+ seconds` + "\n1 test, 1 failure"
+            )
+            local(stdout, stderr) = call_lspec((:'-nocolor', #file_testFail->path))
 
             expect(void == #stderr)
             expect(#stdout->asString->contains(#expected))
@@ -509,5 +514,66 @@ describe('lspec command') => {
             expect(#stdout->asString->contains(#expected))
         }
     }
-}
 
+    context('called with the -documentation argument') => {
+        local(file_testPass) = file('//tmp/lspec.test.pass')
+        local(file_testFail) = file('//tmp/lspec.test.fail')
+        local(file_testPend) = file('//tmp/lspec.test.pend')
+        beforeAll => {
+            #file_testPass->doWithClose => {
+                #file_testPass->openTruncate&writeString("\
+                    describe('passing test') => { it('passes') => { expect(true) } }\
+                ")
+            }
+            #file_testFail->doWithClose => {
+                #file_testFail->openTruncate&writeString("\
+                    describe('failing test') => { it('fails') => { expect(false) } }\
+                ")
+            }
+            #file_testPend->doWithClose => {
+                #file_testPend->openTruncate&writeString("\
+                    describe('pending test') => { it('pends') => { } }\
+                ")
+            }
+        }
+        afterAll => {
+            #file_testPass->delete
+            #file_testFail->delete
+            #file_testPend->delete
+        }
+        it(`prints names of passing tests`) => {
+            local(expected) = regexp("passing test\n    passes\n\n" + `Finished in [0-9.]+ seconds`)
+            local(stdout, stderr) = call_lspec((:'-documentation', #file_testPass->path))
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+        it(`prints names of failing tests`) => {
+            local(expected) = regexp(
+                "failing test\n    fails \\(FAILED - 1\\)\n\n" +
+                string_replace($termColor('boldRed'), -find=`[`, -replace=`\[`) + "Failures:" +
+                string_replace($termColor('normal'), -find=`[`, -replace=`\[`) + "\n\n" +
+                "    1\\) failing test fails\n       Failure/Error: expect\\(false\\) \\} \\}\n" +
+                "           expected: true\n                got: false\n       # 1:48 //tmp/lspec\\.test\\.fail\n\n" +
+                `Finished in [0-9.]+ seconds`
+            )
+            local(stdout, stderr) = call_lspec((:'-documentation', #file_testFail->path))
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+        it(`prints names of pending tests`) => {
+            local(expected) = regexp(
+                "pending test\n    pends\n\n" +
+                string_replace($termColor('boldYellow'), -find=`[`, -replace=`\[`) + "Pending:" +
+                string_replace($termColor('normal'), -find=`[`, -replace=`\[`) + "\n\n" +
+                "    1\\) pending test pends\n           # 1:31 //tmp/lspec.test.pend\n\n" +
+                `Finished in [0-9.]+ seconds`
+            )
+            local(stdout, stderr) = call_lspec((:'-documentation', #file_testPend->path))
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+    }
+}
