@@ -3,7 +3,7 @@ CC = gcc
 KERNEL_NAME = $(shell uname -s)
 
 OSX_DEPLOY_VERS = 10.5
-SDK = /Developer/SDKs/MacOSX$(OSX_DEPLOY_VERS).sdk
+SDK = $(shell xcodebuild -version -sdk macosx Path)
 
 ifeq ($(DEBUG),1)
 
@@ -32,7 +32,7 @@ Linux_DLL_EXT = .so
 
 DLL_EXT = $($(KERNEL_NAME)_DLL_EXT)
 
-LASSO9_MODULE_CMD = /usr/bin/lassoc
+LASSO9_MODULE_CMD = $(shell which lassoc)
 
 C_FLAGS = $(DEBUG_FLAGS) -fPIC
 LN_FLAGS = $(DEBUG_FLAGS) $($(KERNEL_NAME)_LN_FLAGS)

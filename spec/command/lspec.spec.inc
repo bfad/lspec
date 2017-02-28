@@ -12,7 +12,7 @@ define call_lspec(args::staticarray=(:)) => {
     local(my_process) = sys_process
     
     handle => {#my_process->close}
-    #my_process->open($lspec_path, #args)
+    #my_process->open($lspec_path, #args, (:'PATH='+sys_getenv('PATH')))
     #my_process->wait
     #stdout = #my_process->read
     #stderr = #my_process->readError
