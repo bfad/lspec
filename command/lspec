@@ -1,23 +1,23 @@
-#!/usr/bin/lasso9
+#!/usr/bin/env lasso9
 
 define usage(exit_status::integer=-1) => {
     local(cmd) = $argv->get(1)->lastComponent
     stdoutnl("\
-usage: " + #cmd + " [options] [file or director paths]
+usage: " + #cmd + " [options] [file or directory paths]
 
     The " + #cmd + " command executes the Lasso code in the specified file or
-    all Lasso files in the specified directory. If no file or directory path is 
+    all Lasso files in the specified directory. If no file or directory path is
     specified, then it tries a relative directory named \"spec\".
     
     When a directory is specified (or when using the default \"spec\" directory),
-    the command executes all files ending in \".spec.inc\" in that directory. Then 
+    the command executes all files ending in \".spec.inc\" in that directory. Then
     it proceeds to do the same thing in any nested directories. (To specify what
     extensions are considered Lasso files, see the \"-exts\" option.)
 
 Options
 -------
     -documentation
-        Output just the group and test descriptions
+        Output just the group and test descriptions.
     
     -exts CSV_EXT_LIST
         Allows for specifying a comma-separated list of file extensions to be
@@ -28,7 +28,7 @@ Options
         Don't use terminal colors for the output.
         
     -h
-        Displays this help and exits"
+        Displays this help and exits."
     )
     sys_exit(#exit_status)
 }
@@ -45,7 +45,13 @@ define lspec_runDir(d::dir, ext::staticarray=(:'inc')) => {
 }
 
 define lspec_runFile(f::file) => {
-    sourcefile(#f, -autoCollect=false)->invoke
+    protect => {
+        handle_failure => {
+            error_code != error_code_aborted ?
+                stdoutnl('\nError Code: ' + error_code + '\nError Msg: ' + error_msg + '\nError Stack:\n\n' + error_stack + '\n')
+        }
+        sourcefile(#f, -autoCollect=false)->invoke
+    }
 }
 
 // Defaults
@@ -71,7 +77,7 @@ while(#opts->size > 0) => {
             ? usage
         
         #exts = #opts->get(2)->split(',')->asStaticArray
-        // Since we're deaing with the next item, delete one now (we delete the other later)
+        // Since we're dealing with the next item, delete one now (we delete the other later)
         #opts->remove(1,1)
         
     case
@@ -87,11 +93,11 @@ lspec->formatResults(#mode)
 
 #use_color? lspec->useColor
 
-with path in #paths 
+with path in #paths
 let f = file(#path)
 do {
     if(not #f->exists) => {
-        file_stderr->writeString(error_code_resNotFound + ':' + error_msg_resNotFound + ' - ' + #path)
+        file_stderr->writeString(error_code_resNotFound + ':' + error_msg_resNotFound + ' - ' + #path + sys_eol)
         sys_exit(1)
     }
     #f->isDir? lspec_runDir(dir(#path), #exts)

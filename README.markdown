@@ -21,18 +21,18 @@ Installation
 ### Pre-compiled Libraries
 
 1. Click the "Downloads" menu option at the top of this page.
-2. Choose the proper download for your platform
-3. Decompress the files and move lspec to `$LASSO9_HOME/bin/` and lspec.so or lspec.dylib into `$LASSO9_HOME/LassoLibraries/`
+2. Choose the proper download for your platform.
+3. Decompress the files and move lspec to `$LASSO9_HOME/bin/` and lspec.so or lspec.dylib into `$LASSO9_HOME/LassoLibraries/`.
 
 ### Compile From Source
 
     $> cd where/you/want/the/source/installed/
-    $> git clone https://bitbucket.org/bfad/lspec.git
+    $> git clone https://github.com/bfad/lspec.git
     $> cd lspec
     $> make
     $> make install
 
-_Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed. You can follow the instructions [here](http://hints.macworld.com/article.php?story=20110318050811544) to restore the 10.5 SDK to Xcode 4._
+_Note: If you're compiling on Mac OS X, you'll need the 10.5 SDK installed to build a library for all supported versions. You can follow [these instructions](https://github.com/devernay/xcodelegacy) to restore the 10.5 SDK to Xcode 4 and later._
 
 ### Set Your Path
 
@@ -50,16 +50,16 @@ First, create a file named zoo.spec.inc and write a test describing functionalit
                 local(menagerie) = zoo
                 local(num_animals_start) = #menagerie->numberOfAnimals
                 local(num_animals_end)
-                
+
                 #menagerie->addAnimal(animal('Rhino'))
                 #num_animals_end = #menagerie->numberOfAnimals
-                
+
                 expect(#menagerie->hasA('Rhino'))
                 expect(#num_animals_end == 1 + #num_animals_start)
             }
         }
     }
-    
+
 Then run the test and watch it fail.
 
     $> lspec zoo.spec.inc
@@ -68,7 +68,7 @@ Then run the test and watch it fail.
     Failures:
 
         1) Zoo addAnimal inserts an animal into the zoo and increases numberOfAnimals by 1
-           Failure/Error: Unexpcted Error!
+           Failure/Error: Unexpected Error!
                Error Code: -9948
                 Error Msg: Definition Not Found: zoo()
            # 3:9 /Path/To/zoo.spec.inc
@@ -77,7 +77,7 @@ Then run the test and watch it fail.
     1 test, 1 failure
 
 Now add the following code to the beginning of zoo.spec.inc. (Usually you would keep the tests in separate files and have them first include the code you are testing.)
-    
+
     define zoo => type {
         data private animals = array
 
